@@ -1,7 +1,8 @@
 library(M4comp2018)
 library(tsfeatures)
-library(parallel)
+library(use_parallelllel)
 library(gplots)
+library(ggplot2)
 library(tidyverse)
 
 set.seed(42)
@@ -11,8 +12,8 @@ source("fcast.R")
 ###########################################################################
 # Config ####
 
-para <- TRUE
-prop_ts <- NA #0.01
+prop_ts <- NA
+use_parallel <- is.na(prop_ts)
 m4_freqs <- read_csv("m4_horiz.csv")
 horizons <- as.list(m4_freqs$Horizon)
 names(horizons) <- m4_freqs$SP
@@ -47,7 +48,7 @@ m4_data_x_horiz <-
     return(horizons[[as.character(m4_period[[idx]])]]))
 
 
-if (para) {
+if (use_parallel) {
   m4_data_x_deseason <- mclapply(1:length(m4_data_x), function(idx)
     return(deseasonalise(m4_data_x[[idx]], m4_data_x_horiz[[idx]])), mc.cores = 32)
 } else {
@@ -63,7 +64,7 @@ m4_data_xx <-
 
 print("M4 Competition data:")
 
-if (para) {
+if (use_parallel) {
   fcasts <- mclapply(
     1:length(m4_data_x),
     multi_fit_ts,
@@ -87,7 +88,7 @@ fcast_names <- names(fcasts[[1]])
 # Compute sMAPE and MASE ####
 
 
-if (para) {
+if (use_parallel) {
   fcast_errs <- mclapply(1:length(fcasts),
                          compute_fcast_errs,
                          fcasts,
@@ -119,7 +120,7 @@ colnames(fcast_mases_df) <-
 ###########################################################################
 # Features ####
 
-m4_feat_df <- tsfeatures(m4_data_x, parallel = para)
+m4_feat_df <- tsfeatures(m4_data_x, use_parallelllel = use_parallel)
 m4_feat_df$type <-
   unlist(lapply(m4_data, function(ts)
     return(ts$type)))
@@ -130,25 +131,46 @@ m4_feat_df$period <-
 # Combine everything ####
 
 m4_all_df <-
-  bind_cols(m4_feat_df, fcast_smapes_df, fcast_mases_df)
+  bind_cols(fcast_smapes_df, fcast_mases_df, m4_feat_df)
 
-m4_all_df %>%
-  group_by(period, type) %>%
-  summarise_all(mean, na.rm = TRUE) ->
-  m4_sum_df
+# m4_all_df %>%
+#   group_by(period, type) %>%
+#   summarise_all(mean, na.rm = TRUE) ->
+#   m4_sum_df
+#
+# mtx <- as.matrix(m4_sum_df[3:ncol(m4_sum_df)])
+# rownames(mtx) <-
+#   map_chr(1:nrow(m4_sum_df), function(r, df)
+#     return(sprintf("%s, %s", df[r,]$period, df[r,]$type)), m4_sum_df)
+#
+# png("heatmap.png", width = 2048, height = 2048)
+# heatmap.2(
+#   mtx,
+#   srtCol = 45,
+#   cexCol = 2,
+#   cexRow = 2,
+#   scale = "column",
+#   margins = c(16, 24),
+#   main = paste0("M4 Mean Features per Frequency and Domain for ", length(m4_data_x), " M4 time series")
+# )
+# dev.off()
 
-mtx <- as.matrix(m4_sum_df[3:ncol(m4_sum_df)])
-rownames(mtx) <-
-  map_chr(1:nrow(m4_sum_df), function(r, df)
-    return(sprintf("%s, %s", df[r,]$period, df[r,]$type)), m4_sum_df)
-png("heatmap.png", width = 2048, height = 2048)
-heatmap.2(
-  mtx,
-  srtCol = 45,
-  cexCol = 2,
-  cexRow = 2,
-  scale = "column",
-  margins = c(16, 24),
-  main = paste0("M4 Mean Features per Frequency and Domain for ", length(m4_data_x), " M4 time series")
+cor_base <- round(cor(m4_all_df[1:(ncol(m4_all_df)-2)]), 3)
+cor_base[lower.tri(cor_base)] <- NA
+
+cor_tri <- as.data.frame(cor_base) %>%
+  mutate(Var1 = factor(row.names(.), levels=row.names(.))) %>%
+  gather(key = Var2, value = value, -Var1, na.rm = TRUE, factor_key = TRUE)
+
+gg <- ggplot(data = cor_tri, aes(Var2, Var1, fill = value)) +
+  geom_tile() +
+  theme(axis.text.x = element_text(hjust = 1, angle = 45))
+print(gg)
+ggsave(
+  "correlation_mtx.png",
+  dpi = 100,
+  scale = 5,
+  width = 2,
+  height = 2,
+  units = "in"
 )
-dev.off()
