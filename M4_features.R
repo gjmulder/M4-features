@@ -12,7 +12,12 @@ source("fcast.R")
 ###########################################################################
 # Config ####
 
-prop_ts <- NA #0.001
+if (interactive()) {
+  prop_ts <- 0.01
+} else
+{
+  prop_ts <- NA
+}
 use_parallel <- is.na(prop_ts)
 m4_freqs <- read_csv("m4_horiz.csv")
 horizons <- as.list(m4_freqs$Horizon)
@@ -150,7 +155,13 @@ m4_all_df <-
 # )
 # dev.off()
 
-m4_all_df[is.na(m4_all_df)] <- 0
+###########################################################################
+# Compute correlation matrix ####
+
+feature_nas <- colSums(is.na(m4_all_df))
+print("Features with NA values:")
+print(feature_nas[feature_nas > 0])
+m4_all_df[is.na(m4_all_df)] <- 0.0
 cor_base_mtx <- round(cor(m4_all_df[1:(ncol(m4_all_df) - 2)]), 2)
 cor_base_mtx[lower.tri(cor_base_mtx)] <- NA
 
@@ -166,11 +177,16 @@ cor_tri_df <- as.data.frame(cor_base_mtx) %>%
 
 gg <-
   ggplot(data = cor_tri_df, aes(Var1, Var2, fill = value)) +
-  ggtitle(paste0("Correlation Matrix for time series features, sMAPEs and MASEs for ", length(m4_data_x), " M4 time series")) +
+  ggtitle(
+    paste0(
+      "Correlation Matrix for time series features, sMAPEs and MASEs for ",
+      length(m4_data_x),
+      " M4 time series"
+    )
+  ) +
   geom_tile() +
   theme(axis.text.x = element_text(hjust = 1, angle = 45))
 print(gg)
-
 
 if (!interactive()) {
   cor_df <- as.data.frame(t(cor_base_mtx))
