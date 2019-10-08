@@ -2,10 +2,10 @@ library(forecast)
 source("benchmarks_eval.R")
 
 multi_fit_ts <- function(idx, data_x, data_x_deseason, m4_data_x_horiz) {
-  browser()
   fcast_naive <- naive(data_x[[idx]], h = m4_data_x_horiz[[idx]])$mean
   fcast_seasonal_naive <-
     seasonal_naive(data_x[[idx]], fcast_horiz = m4_data_x_horiz[[idx]])
+  # browser()
   fcast_naive2 <-
     naive(data_x_deseason[[idx]]$output, h = m4_data_x_horiz[[idx]])$mean * data_x_deseason[[idx]]$si_out
   fcast_ses <-
