@@ -1,8 +1,8 @@
 library(M4comp2018)
 library(tsfeatures)
-library(tidyverse)
-# library(ggplot2)
+library(parallel)
 library(gplots)
+library(tidyverse)
 
 set.seed(42)
 options(warn = 2, width = 1024)
@@ -11,7 +11,7 @@ source("fcast.R")
 ###########################################################################
 # Config ####
 
-prop_ts <- 0.002
+prop_ts <- NA
 m4_freqs <- read_csv("m4_horiz.csv")
 horizons <- as.list(m4_freqs$Horizon)
 names(horizons) <- m4_freqs$SP
@@ -46,59 +46,62 @@ m4_data_x_horiz <-
     return(horizons[[as.character(m4_period[[idx]])]]))
 
 m4_data_x_deseason <-
-  lapply(1:length(m4_data_x), function(idx)
-    return(deseasonalise(m4_data_x[[idx]], m4_data_x_horiz[[idx]])))
-# err_names <- c("sMAPE", "MASE", "OWA")
+  mclapply(1:length(m4_data_x), function(idx)
+    return(deseasonalise(m4_data_x[[idx]], m4_data_x_horiz[[idx]])), mc.cores = 32)
 
 m4_data_xx <-
   lapply(m4_data, function(ts)
     return(ts$xx))
 
 ###########################################################################
-# Features ####
-
-m4_feat_df <- tsfeatures(m4_data_x)
-m4_feat_df$type <-
-  unlist(lapply(m4_data, function(ts)
-    return(ts$type)))
-m4_feat_df$period <-
-  unlist(m4_period)
-
-###########################################################################
 # Forecast each TS using each of the benchmark methods ####
 
 print("M4 Competition data:")
 fcasts <-
-  lapply(1:length(m4_data_x),
-         multi_fit_ts,
-         m4_data_x,
-         m4_data_x_deseason,
-         m4_data_x_horiz)
+  mclapply(
+    1:length(m4_data_x),
+    multi_fit_ts,
+    m4_data_x,
+    m4_data_x_deseason,
+    m4_data_x_horiz,
+    mc.cores = 32
+  )
 fcast_names <- names(fcasts[[1]])
 
 ###########################################################################
 # Compute sMAPE and MASE ####
 
 fcast_errs <-
-  lapply(1:length(fcasts),
-         compute_fcast_errs,
-         fcasts,
-         m4_data_x,
-         m4_data_xx)
+  mclapply(1:length(fcasts),
+           compute_fcast_errs,
+           fcasts,
+           m4_data_x,
+           m4_data_xx,
+           mc.cores = 32)
 
 fcast_smapes_df <-
   bind_rows(lapply(fcast_errs,
                    function(errs)
-                     return(errs[1,])))
+                     return(errs[1, ])))
 colnames(fcast_smapes_df) <-
   paste0(colnames(fcast_smapes_df), "_smape")
 
 fcast_mases_df <-
   bind_rows(lapply(fcast_errs,
                    function(errs)
-                     return(errs[2,])))
+                     return(errs[2, ])))
 colnames(fcast_mases_df) <-
   paste0(colnames(fcast_mases_df), "_mase")
+
+###########################################################################
+# Features ####
+
+m4_feat_df <- tsfeatures(m4_data_x, parallel = TRUE)
+m4_feat_df$type <-
+  unlist(lapply(m4_data, function(ts)
+    return(ts$type)))
+m4_feat_df$period <-
+  unlist(m4_period)
 
 ###########################################################################
 # Combine everything ####
@@ -116,8 +119,10 @@ rownames(mtx) <-
   map_chr(1:nrow(m4_sum_df), function(r, df)
     return(sprintf("%s, %s", df[r,]$period, df[r,]$type)), m4_sum_df)
 # dev.new(width = 10, height = 10)
-hm <- heatmap.2(mtx, srtCol = 45, scale="column", margins=c(8,12),
+png("heatmap.png", width=2048, height = 2048)
+heatmap.2(mtx, srtCol = 45, scale="column", margins=c(8,12),
                 main = "M4 Mean Features per Frequency and Domain")
+dev.off()
 
 # , xlab = "Features", ylab =  "Freq, Domain",
 # fname <-
