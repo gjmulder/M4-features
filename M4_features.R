@@ -1,6 +1,6 @@
 library(M4comp2018)
 library(tsfeatures)
-library(use_parallelllel)
+library(parallel)
 library(gplots)
 library(ggplot2)
 library(tidyverse)
@@ -12,7 +12,7 @@ source("fcast.R")
 ###########################################################################
 # Config ####
 
-prop_ts <- NA
+prop_ts <- NA #0.001
 use_parallel <- is.na(prop_ts)
 m4_freqs <- read_csv("m4_horiz.csv")
 horizons <- as.list(m4_freqs$Horizon)
@@ -28,7 +28,6 @@ if (is.na(prop_ts)) {
   m4_data <- sample(M4, prop_ts * length(M4))
 }
 
-# M4 Competition data
 m4_data_x <-
   lapply(m4_data, function(ts)
     return(ts$x))
@@ -43,17 +42,16 @@ m4_period <-
     return(ts$period))
 names(m4_period) <- "period"
 
-m4_data_x_horiz <-
+m4_horiz <-
   lapply(1:length(m4_data_x), function(idx)
     return(horizons[[as.character(m4_period[[idx]])]]))
 
-
 if (use_parallel) {
   m4_data_x_deseason <- mclapply(1:length(m4_data_x), function(idx)
-    return(deseasonalise(m4_data_x[[idx]], m4_data_x_horiz[[idx]])), mc.cores = 32)
+    return(deseasonalise(m4_data_x[[idx]], m4_horiz[[idx]])), mc.cores = 32)
 } else {
   m4_data_x_deseason <- lapply(1:length(m4_data_x), function(idx)
-    return(deseasonalise(m4_data_x[[idx]], m4_data_x_horiz[[idx]])))
+    return(deseasonalise(m4_data_x[[idx]], m4_horiz[[idx]])))
 }
 m4_data_xx <-
   lapply(m4_data, function(ts)
@@ -70,23 +68,20 @@ if (use_parallel) {
     multi_fit_ts,
     m4_data_x,
     m4_data_x_deseason,
-    m4_data_x_horiz,
+    m4_horiz,
     mc.cores = 32
   )
 } else {
-  fcasts <- lapply(
-    1:length(m4_data_x),
-    multi_fit_ts,
-    m4_data_x,
-    m4_data_x_deseason,
-    m4_data_x_horiz
-  )
+  fcasts <- lapply(1:length(m4_data_x),
+                   multi_fit_ts,
+                   m4_data_x,
+                   m4_data_x_deseason,
+                   m4_horiz)
 }
 fcast_names <- names(fcasts[[1]])
 
 ###########################################################################
 # Compute sMAPE and MASE ####
-
 
 if (use_parallel) {
   fcast_errs <- mclapply(1:length(fcasts),
@@ -106,21 +101,21 @@ if (use_parallel) {
 fcast_smapes_df <-
   bind_rows(lapply(fcast_errs,
                    function(errs)
-                     return(errs[1, ])))
+                     return(errs[1,])))
 colnames(fcast_smapes_df) <-
   paste0(colnames(fcast_smapes_df), "_smape")
 
 fcast_mases_df <-
   bind_rows(lapply(fcast_errs,
                    function(errs)
-                     return(errs[2, ])))
+                     return(errs[2,])))
 colnames(fcast_mases_df) <-
   paste0(colnames(fcast_mases_df), "_mase")
 
 ###########################################################################
 # Features ####
 
-m4_feat_df <- tsfeatures(m4_data_x, use_parallelllel = use_parallel)
+m4_feat_df <- tsfeatures(m4_data_x, parallel = use_parallel)
 m4_feat_df$type <-
   unlist(lapply(m4_data, function(ts)
     return(ts$type)))
@@ -155,22 +150,36 @@ m4_all_df <-
 # )
 # dev.off()
 
-cor_base <- round(cor(m4_all_df[1:(ncol(m4_all_df)-2)]), 3)
-cor_base[lower.tri(cor_base)] <- NA
+m4_all_df[is.na(m4_all_df)] <- 0
+cor_base_mtx <- round(cor(m4_all_df[1:(ncol(m4_all_df) - 2)]), 2)
+cor_base_mtx[lower.tri(cor_base_mtx)] <- NA
 
-cor_tri <- as.data.frame(cor_base) %>%
-  mutate(Var1 = factor(row.names(.), levels=row.names(.))) %>%
-  gather(key = Var2, value = value, -Var1, na.rm = TRUE, factor_key = TRUE)
+cor_tri_df <- as.data.frame(cor_base_mtx) %>%
+  mutate(Var1 = factor(row.names(.), levels = row.names(.))) %>%
+  gather(
+    key = Var2,
+    value = value,
+    -Var1,
+    na.rm = TRUE,
+    factor_key = TRUE
+  )
 
-gg <- ggplot(data = cor_tri, aes(Var2, Var1, fill = value)) +
+gg <-
+  ggplot(data = cor_tri_df, aes(Var1, Var2, fill = value)) +
   geom_tile() +
   theme(axis.text.x = element_text(hjust = 1, angle = 45))
 print(gg)
-ggsave(
-  "correlation_mtx.png",
-  dpi = 100,
-  scale = 5,
-  width = 2,
-  height = 2,
-  units = "in"
-)
+
+
+if (!interactive()) {
+  cor_df <- as.data.frame(t(cor_base_mtx))
+  write.csv(cor_df[rev(rownames(cor_df)),], "correlation_mtx.csv")
+  ggsave(
+    "correlation_mtx.png",
+    dpi = 100,
+    scale = 5,
+    width = 2,
+    height = 2,
+    units = "in"
+  )
+}
