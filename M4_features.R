@@ -48,7 +48,7 @@ m4_horiz <-
 
 if (use_parallel) {
   m4_data_x_deseason <- mclapply(1:length(m4_data_x), function(idx)
-    return(deseasonalise(m4_data_x[[idx]], m4_horiz[[idx]])), mc.cores = 32)
+    return(deseasonalise(m4_data_x[[idx]], m4_horiz[[idx]])), mc.cores = 16)
 } else {
   m4_data_x_deseason <- lapply(1:length(m4_data_x), function(idx)
     return(deseasonalise(m4_data_x[[idx]], m4_horiz[[idx]])))
@@ -69,7 +69,7 @@ if (use_parallel) {
     m4_data_x,
     m4_data_x_deseason,
     m4_horiz,
-    mc.cores = 32
+    mc.cores = 16
   )
 } else {
   fcasts <- lapply(1:length(m4_data_x),
@@ -89,7 +89,7 @@ if (use_parallel) {
                          fcasts,
                          m4_data_x,
                          m4_data_xx,
-                         mc.cores = 32)
+                         mc.cores = 16)
 } else {
   fcast_errs <- lapply(1:length(fcasts),
                        compute_fcast_errs,
@@ -166,6 +166,7 @@ cor_tri_df <- as.data.frame(cor_base_mtx) %>%
 
 gg <-
   ggplot(data = cor_tri_df, aes(Var1, Var2, fill = value)) +
+  ggtitle("Correlation Matrix for M4 TS Features, sMAPEs and MASEs") +
   geom_tile() +
   theme(axis.text.x = element_text(hjust = 1, angle = 45))
 print(gg)
