@@ -166,7 +166,7 @@ cor_tri_df <- as.data.frame(cor_base_mtx) %>%
 
 gg <-
   ggplot(data = cor_tri_df, aes(Var1, Var2, fill = value)) +
-  ggtitle("Correlation Matrix for M4 TS Features, sMAPEs and MASEs") +
+  ggtitle(paste0("Correlation Matrix for time series features, sMAPEs and MASEs for ", length(m4_data_x), " M4 time series")) +
   geom_tile() +
   theme(axis.text.x = element_text(hjust = 1, angle = 45))
 print(gg)
