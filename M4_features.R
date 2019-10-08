@@ -154,49 +154,58 @@ m4_all_df <-
 #   main = paste0("M4 Mean Features per Frequency and Domain for ", length(m4_data_x), " M4 time series")
 # )
 # dev.off()
+#
+# ###########################################################################
+# # Compute correlation matrix ####
+#
+# feature_nas <- colSums(is.na(m4_all_df))
+# print("Features with NA values:")
+# print(feature_nas[feature_nas > 0])
+# m4_all_df[is.na(m4_all_df)] <- 0.0
+# cor_base_mtx <- round(cor(m4_all_df[1:(ncol(m4_all_df) - 2)]), 2)
+# cor_base_mtx[lower.tri(cor_base_mtx)] <- NA
+#
+# cor_tri_df <- as.data.frame(cor_base_mtx) %>%
+#   mutate(Var1 = factor(row.names(.), levels = row.names(.))) %>%
+#   gather(
+#     key = Var2,
+#     value = value,
+#     -Var1,
+#     na.rm = TRUE,
+#     factor_key = TRUE
+#   )
+#
+# gg <-
+#   ggplot(data = cor_tri_df, aes(Var1, Var2, fill = value)) +
+#   ggtitle(
+#     paste0(
+#       "Correlation Matrix for time series features, sMAPEs and MASEs for ",
+#       length(m4_data_x),
+#       " M4 time series"
+#     )
+#   ) +
+#   geom_tile() +
+#   theme(axis.text.x = element_text(hjust = 1, angle = 45))
+# print(gg)
+#
+# if (!interactive()) {
+#   cor_df <- as.data.frame(t(cor_base_mtx))
+#   write.csv(cor_df[rev(rownames(cor_df)),], "correlation_mtx.csv")
+#   ggsave(
+#     "correlation_mtx.png",
+#     dpi = 100,
+#     scale = 5,
+#     width = 2,
+#     height = 2,
+#     units = "in"
+#   )
+# }
 
-###########################################################################
-# Compute correlation matrix ####
-
-feature_nas <- colSums(is.na(m4_all_df))
-print("Features with NA values:")
-print(feature_nas[feature_nas > 0])
-m4_all_df[is.na(m4_all_df)] <- 0.0
-cor_base_mtx <- round(cor(m4_all_df[1:(ncol(m4_all_df) - 2)]), 2)
-cor_base_mtx[lower.tri(cor_base_mtx)] <- NA
-
-cor_tri_df <- as.data.frame(cor_base_mtx) %>%
-  mutate(Var1 = factor(row.names(.), levels = row.names(.))) %>%
-  gather(
-    key = Var2,
-    value = value,
-    -Var1,
-    na.rm = TRUE,
-    factor_key = TRUE
-  )
-
-gg <-
-  ggplot(data = cor_tri_df, aes(Var1, Var2, fill = value)) +
-  ggtitle(
-    paste0(
-      "Correlation Matrix for time series features, sMAPEs and MASEs for ",
-      length(m4_data_x),
-      " M4 time series"
-    )
-  ) +
-  geom_tile() +
-  theme(axis.text.x = element_text(hjust = 1, angle = 45))
-print(gg)
-
-if (!interactive()) {
-  cor_df <- as.data.frame(t(cor_base_mtx))
-  write.csv(cor_df[rev(rownames(cor_df)),], "correlation_mtx.csv")
-  ggsave(
-    "correlation_mtx.png",
-    dpi = 100,
-    scale = 5,
-    width = 2,
-    height = 2,
-    units = "in"
-  )
+fit_lm <- function(method_err_name){
+  formula <- as.formula(paste(method_err_name, "~", paste(colnames(m4_feat_df)[1:(ncol(m4_feat_df)-2)], collapse='+')))
+  return(lm(formula, data = m4_all_df))
 }
+method_err_names <- c(colnames(fcast_smapes_df), colnames(fcast_mases_df))
+fits_lm <- lapply(method_err_names, fit_lm)
+names(fits_lm) <- method_err_names
+print(lapply(fits_lm, summary))
