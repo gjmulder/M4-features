@@ -177,18 +177,18 @@ m4_data_all_df %>%
 m4_data_sum_df %>%
   mutate(
     data = sprintf(
-      # "%8.3f%8.3f\n%8.3f%8.3f\n%8.3f%8.3f\n%8.3f%8.3f\n%8.3f%8.3f\n%8.3f%8.3f",
-      "%8.3f%8.3f\n%8.3f%8.3f",
+      "%6.1f%6.1f\n%6.1f%6.1f\n%6.1f%6.1f\n%6.1f%6.1f\n%6.1f%6.1f\n%6.1f%6.1f",
+      # "%6.1f%6.1f\n%6.1f%6.1f",
       Entropy_mean,
       Entropy_sd,
-      # Trend_mean,
-      # Trend_sd,
-      # Season_mean,
-      # Season_sd,
-      # ACF1_mean,
-      # ACF1_sd,
-      # Lambda_mean,
-      # Lambda_sd,
+      Trend_mean,
+      Trend_sd,
+      Season_mean,
+      Season_sd,
+      ACF1_mean,
+      ACF1_sd,
+      Lambda_mean,
+      Lambda_sd,
       combined_mean,
       combined_sd
     )
@@ -203,5 +203,5 @@ col_names[length(col_names)] <- " "
 
 # png('feat_freqs.png', width = 4096, height = 4096)
 dev.off()
-# print(grid.table(results_df, rows = rep("Entropy\nTrend\nSeason\nACF1\nLambda\nMASE", nrow(results_df)), cols = col_names))
-print(grid.table(results_df, rows = rep("Entropy\nMASE", nrow(results_df)), cols = col_names))
+print(grid.table(results_df, rows = rep("Entropy\nTrend\nSeason\nACF1\nLambda\nMASE", nrow(results_df)), cols = col_names))
+# print(grid.table(results_df, rows = rep("Entropy\nMASE", nrow(results_df)), cols = col_names))
