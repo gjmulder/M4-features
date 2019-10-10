@@ -7,14 +7,14 @@ library(gridExtra)
 library(tidyverse)
 
 set.seed(42)
-options(warn = 2, width = 1024)
+# options(warn = 2, width = 1024)
 source("fcast.R")
 
 ###########################################################################
 # Config ####
 
 if (interactive()) {
-  prop_ts <- 0.01
+  prop_ts <- NA #0.01
 } else
 {
   prop_ts <- NA
@@ -170,15 +170,36 @@ m4_data_all_df$period <- unlist(m4_period)
 
 m4_data_all_df %>%
   group_by(type, period) %>%
-  summarise_if(is.numeric, mean, na.rm = TRUE) ->
+  # summarise_if(is.numeric, list(mean=mean, stddev=sd), na.rm = TRUE) ->
+  summarise_if(is.numeric, list(mean=mean, sd=sd), na.rm = TRUE) ->
   m4_data_sum_df
 
 m4_data_sum_df %>%
-  mutate(data = sprintf("%8.3f\n%8.3f\n%8.3f", Entropy, Trend, combined)) %>% select(type, period, data) %>%
+  mutate(
+    data = sprintf(
+      "%8.3f%8.3f\n%8.3f%8.3f\n%8.3f%8.3f\n%8.3f%8.3f\n%8.3f%8.3f\n%8.3f%8.3f",
+      Entropy_mean,
+      Entropy_sd,
+      Trend_mean,
+      Trend_sd,
+      Season_mean,
+      Season_sd,
+      ACF1_mean,
+      ACF1_sd,
+      Lambda_mean,
+      Lambda_sd,
+      combined_mean,
+      combined_sd
+    )
+  ) %>%
+  select(type, period, data) %>%
   spread(type, data) %>%
-  select(2:ncol(.), 1) %>%
-  rename(` ` = period) ->
+  select(2:ncol(.), 1) ->
   results_df
 
+col_names <-  paste0(colnames(results_df), "\nmean   sd")
+col_names[length(col_names)] <- " "
+
+png('feat_freqs.png', width = 4096, height = 4096)
+print(grid.table(results_df, rows = rep("Entropy\nTrend\nSeason\nACF1\nLambda\nMASE", nrow(results_df)), cols = col_names))
 dev.off()
-print(grid.table(results_df, rows = rep("Entropy\nTrend\nMASE", nrow(results_df))))
