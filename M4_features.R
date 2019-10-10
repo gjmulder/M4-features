@@ -106,19 +106,19 @@ if (use_parallel) {
                        m4_data_xx)
 }
 
-# fcast_smapes_df <-
-#   bind_rows(lapply(fcast_errs,
-#                    function(errs)
-#                      return(errs[1, ])))
-# colnames(fcast_smapes_df) <-
-#   paste0(colnames(fcast_smapes_df), "_smape")
+fcast_smapes_df <-
+  bind_rows(lapply(fcast_errs,
+                   function(errs)
+                     return(errs[1, ])))
+colnames(fcast_smapes_df) <-
+  paste0(colnames(fcast_smapes_df), "_smape")
 
 fcast_mases_df <-
   bind_rows(lapply(fcast_errs,
                    function(errs)
                      return(errs[2,])))
-# colnames(fcast_mases_df) <-
-#   paste0(colnames(fcast_mases_df), "_mase")
+colnames(fcast_mases_df) <-
+  paste0(colnames(fcast_mases_df), "_mase")
 
 ###########################################################################
 # Features ####
@@ -164,7 +164,7 @@ khs <-
 # Combine forecasts and features ####
 
 m4_data_all_df <-
-  bind_cols(khs, fcast_mases_df)
+  bind_cols(khs, fcast_mases_df, fcast_smapes_df)
 m4_data_all_df$type <- unlist(m4_type)
 m4_data_all_df$period <- unlist(m4_period)
 
@@ -201,8 +201,8 @@ m4_data_all_df %>%
 bind_rows(m4_type_period_df, m4_type_df, m4_period_df, totals_df) %>%
   mutate(
     data = sprintf(
-      "%6.2f%6.2f\n%6.2f%6.2f\n%6.2f%6.2f\n%6.2f%6.2f\n%6.2f%6.2f\n%6.2f%6.2f",
-      # "%6.2f%6.2f\n%6.2f%6.2f",
+      "%7.2f%7.2f\n%7.2f%7.2f\n%7.2f%7.2f\n%7.2f%7.2f\n%7.2f%7.2f\n%7.2f%7.2f\n%7.2f%7.2f",
+      # "%7.2f%7.2f\n%7.2f%7.2f",
       Entropy_mean,
       Entropy_sd,
       Trend_mean,
@@ -213,8 +213,10 @@ bind_rows(m4_type_period_df, m4_type_df, m4_period_df, totals_df) %>%
       ACF1_sd,
       Lambda_mean,
       Lambda_sd,
-      combined_mean,
-      combined_sd
+      combined_mase_mean,
+      combined_mase_sd,
+      combined_smape_mean,
+      combined_smape_sd
     )
   ) %>%
   select(type, period, data) %>%
@@ -231,7 +233,7 @@ dev.off()
 print(grid.table(
   results_df[c(6, 3, 2, 5, 7, 1, 4),],
   rows = rep(
-    "Entropy\nTrend\nSeason\nACF1\nLambda\nMASE",
+    "Entropy\nTrend\nSeason\nACF1\nLambda\nMASE\nsMAPE",
     nrow(results_df)
   ),
   cols = col_names
