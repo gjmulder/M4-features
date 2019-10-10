@@ -116,7 +116,7 @@ if (use_parallel) {
 fcast_mases_df <-
   bind_rows(lapply(fcast_errs,
                    function(errs)
-                     return(errs[2, ])))
+                     return(errs[2,])))
 # colnames(fcast_mases_df) <-
 #   paste0(colnames(fcast_mases_df), "_mase")
 
@@ -157,8 +157,8 @@ khs <-
     Season = seasonal_strength,
     ACF1 = e_acf1,
     Lambda = lambda
-  ) %>%
-  mutate(Period = as.factor(Frequency))
+  ) #%>%
+#mutate(Period = as.factor(Frequency))
 
 ###########################################################################
 # Combine forecasts and features ####
@@ -170,15 +170,39 @@ m4_data_all_df$period <- unlist(m4_period)
 
 m4_data_all_df %>%
   group_by(type, period) %>%
-  # summarise_if(is.numeric, list(mean=mean, stddev=sd), na.rm = TRUE) ->
-  summarise_if(is.numeric, list(mean=mean, sd=sd), na.rm = TRUE) ->
-  m4_data_sum_df
+  summarise_if(is.numeric, list(mean = mean, sd = sd), na.rm = TRUE) %>%
+  ungroup %>%
+  mutate(type = as.character(type)) %>%
+  mutate(period = as.character(period)) ->
+  m4_type_period_df
 
-m4_data_sum_df %>%
+m4_data_all_df %>%
+  group_by(type) %>%
+  summarise_if(is.numeric, list(mean = mean, sd = sd), na.rm = TRUE) %>%
+  ungroup %>%
+  mutate(type = as.character(type)) %>%
+  mutate(period = "Total") ->
+  m4_type_df
+
+m4_data_all_df %>%
+  group_by(period) %>%
+  summarise_if(is.numeric, list(mean = mean, sd = sd), na.rm = TRUE) %>%
+  ungroup %>%
+  mutate(period = as.character(period)) %>%
+  mutate(type = "Total") ->
+  m4_period_df
+
+m4_data_all_df %>%
+  summarise_if(is.numeric, list(mean = mean, sd = sd), na.rm = TRUE) %>%
+  mutate(type = "Total") %>%
+  mutate(period = "Total") ->
+  totals_df
+
+bind_rows(m4_type_period_df, m4_type_df, m4_period_df, totals_df) %>%
   mutate(
     data = sprintf(
-      "%6.1f%6.1f\n%6.1f%6.1f\n%6.1f%6.1f\n%6.1f%6.1f\n%6.1f%6.1f\n%6.1f%6.1f",
-      # "%6.1f%6.1f\n%6.1f%6.1f",
+      "%6.2f%6.2f\n%6.2f%6.2f\n%6.2f%6.2f\n%6.2f%6.2f\n%6.2f%6.2f\n%6.2f%6.2f",
+      # "%6.2f%6.2f\n%6.2f%6.2f",
       Entropy_mean,
       Entropy_sd,
       Trend_mean,
@@ -195,13 +219,128 @@ m4_data_sum_df %>%
   ) %>%
   select(type, period, data) %>%
   spread(type, data) %>%
-  select(2:ncol(.), 1) ->
+  select(Micro, Industry, Macro, Finance, Demographic, Other, Total, period) %>%
+  arrange(c(7, 1, 2, 3, 4, 5, 6)) ->
   results_df
 
 col_names <-  paste0(colnames(results_df), "\nmean   sd")
-col_names[length(col_names)] <- " "
+col_names[length(col_names)] <- "Freq"
 
 # png('feat_freqs.png', width = 4096, height = 4096)
 dev.off()
-print(grid.table(results_df, rows = rep("Entropy\nTrend\nSeason\nACF1\nLambda\nMASE", nrow(results_df)), cols = col_names))
+print(grid.table(
+  results_df[c(6, 3, 2, 5, 7, 1, 4),],
+  rows = rep(
+    "Entropy\nTrend\nSeason\nACF1\nLambda\nMASE",
+    nrow(results_df)
+  ),
+  cols = col_names
+))
 # print(grid.table(results_df, rows = rep("Entropy\nMASE", nrow(results_df)), cols = col_names))
+
+# ###########################################################################
+# # Compute correlation matrix ####
+#
+# m4_all_df <-
+#   bind_cols(
+#     khs %>%
+#       select(Period, Entropy, Trend, Season, ACF1, Lambda),
+#     fcast_smapes_df %>%
+#       select(
+#         naive2_smape,
+#         ses_smape,
+#         holt_smape,
+#         holt_damped_smape,
+#         theta_classic_smape,
+#         combined_smape
+#       ),
+#     fcast_mases_df %>%
+#       select(
+#         naive2_mase,
+#         ses_mase,
+#         holt_mase,
+#         holt_damped_mase,
+#         theta_classic_mase,
+#         combined_mase
+#       )
+#   )
+#
+# # m4_all_df[is.na(m4_all_df)] <- 0.0
+# m4_all_df$period <- as.numeric(m4_all_df$period)
+# m4_all_df$type <- as.numeric(m4_all_df$type)
+# cor_base_mtx <- round(cor(m4_all_df), 2)
+# cor_base_mtx[lower.tri(cor_base_mtx)] <- NA
+#
+# cor_tri_df <- as.data.frame(cor_base_mtx) %>%
+#   mutate(Var1 = factor(row.names(.), levels = row.names(.))) %>%
+#   gather(
+#     key = Var2,
+#     value = value,
+#     -Var1,
+#     na.rm = TRUE,
+#     factor_key = TRUE
+#   )
+#
+# gg <- ggplot(cor_tri_df, aes(Var2, Var1, fill = value)) +
+#   ggtitle(
+#     paste0(
+#       "Feature cross correlation for different statistical methods. ",
+#       nrow(m4_all_df),
+#       " time series."
+#     )
+#   ) +
+#   geom_tile(color = "white") +
+#   scale_fill_gradient2(
+#     low = "blue",
+#     high = "red",
+#     mid = "white",
+#     midpoint = 0,
+#     limit = c(-1, 1),
+#     space = "Lab",
+#     name = "Correlation"
+#   ) +
+#   theme_minimal() + # minimal theme
+#   theme(axis.text.x = element_text(
+#     angle = 45,
+#     vjust = 1,
+#     size = 12,
+#     hjust = 1
+#   )) +
+#   theme(axis.text.y = element_text(
+#     vjust = 1,
+#     size = 12,
+#     hjust = 1
+#   )) +
+#   coord_fixed() +
+#   geom_text(aes(Var2, Var1, label = value),
+#             color = "black",
+#             size = 4) +
+#   theme(
+#     axis.title.x = element_blank(),
+#     axis.title.y = element_blank(),
+#     panel.grid.major = element_blank(),
+#     panel.border = element_blank(),
+#     panel.background = element_blank(),
+#     axis.ticks = element_blank(),
+#     legend.justification = c(1, 0),
+#     legend.position = c(0.6, 0.7),
+#     legend.direction = "horizontal"
+#   ) +
+#   guides(fill = guide_colorbar(
+#     barwidth = 7,
+#     barheight = 1,
+#     title.position = "top",
+#     title.hjust = 0.5
+#   ))
+#
+# print(gg)
+# if (!interactive()) {
+#   ggsave(
+#     "correlation_mtx.png",
+#     dpi = 100,
+#     scale = 5,
+#     width = 2,
+#     height = 2,
+#     units = "in"
+#   )
+# }
