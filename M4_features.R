@@ -93,26 +93,37 @@ if (use_parallel) {
 }
 
 fcasts_slawek <- load_slawek_data(slawek_output_dir)
-fcasts2 <- lapply(1:length(m4_data_x),
+fcasts_all <- lapply(1:length(m4_data_x),
                  function(idx) return(c(fcasts[[idx]], list(slawek = fcasts_slawek[[m4_st[[idx]]]]))))
+fcast_names <- names(fcasts_all[[1]])
 
-# ###########################################################################
-# # Compute sMAPE and MASE ####
-#
-# if (use_parallel) {
-#   fcast_errs <- mclapply(1:length(fcasts),
-#                          compute_fcast_errs,
-#                          fcasts,
-#                          m4_data_x,
-#                          m4_data_xx,
-#                          mc.cores = 16)
-# } else {
-#   fcast_errs <- lapply(1:length(fcasts),
-#                        compute_fcast_errs,
-#                        fcasts,
-#                        m4_data_x,
-#                        m4_data_xx)
-# }
+###########################################################################
+# Compute sMAPE and MASE ####
+
+if (use_parallel) {
+  fcast_errs <- mclapply(1:length(fcasts),
+                         compute_fcast_errs,
+                         fcasts_all,
+                         m4_data_x,
+                         m4_data_xx,
+                         mc.cores = 16)
+} else {
+  fcast_errs <- lapply(1:length(fcasts),
+                       compute_fcast_errs,
+                       fcasts_all,
+                       m4_data_x,
+                       m4_data_xx)
+}
+
+mean_errs_df <-
+  as.data.frame(lapply(fcast_names, mean_fcast_errs, fcast_errs))
+colnames(mean_errs_df) <- fcast_names
+mean_errs_df <-
+  rbind(mean_errs_df,
+        colMeans(mean_errs_df / mean_errs_df$naive2))
+rownames(mean_errs_df) <- err_names
+print(round(mean_errs_df, 3))
+
 #
 # fcast_smapes_df <-
 #   unlist(lapply(fcast_errs,
