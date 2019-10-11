@@ -129,8 +129,8 @@ m4_data_all_df <-
   )
 
 prop_str <- function(x) {
-  pt <- round(100 * prop.table(table(x)))
-  return(paste0(names(pt), sprintf(":%4d%%", pt), "\n", collapse = ''))
+  pt <- round(100 * prop.table(table(x)), 1)
+  return(paste0(names(pt), sprintf(":%5.1f%%", pt), "\n", collapse = ''))
 }
 
 m4_data_all_df %>%
@@ -158,11 +158,19 @@ m4_data_all_df %>%
 
 bind_rows(m4_type_period_df, m4_type_df, m4_period_df, m4_total_df) %>%
   spread(type, data) %>%
-  arrange(c(7, 4, 3, 6, 1, 2, 5)) ->
+  select(Micro, Industry, Macro, Finance, Demographic, Other, Total, period) ->
   results_df
 
+results_df <- as.data.frame(results_df)
+rownames(results_df) <- results_df$period
+results_df$period <- NULL
+
+tt <- gridExtra::ttheme_default(
+  core = list(fg_params=list(cex = 0.8)),
+  colhead = list(fg_params=list(cex = 0.8)),
+  rowhead = list(fg_params=list(cex = 0.8)))
 dev.off()
-print(grid.table(results_df))
+print(grid.table(results_df[c(7, 4, 3, 6, 1, 2, 5),], theme=tt))
 
 # ,
 # rows = rep(
