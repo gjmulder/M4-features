@@ -2,7 +2,7 @@ library(forecast)
 source("benchmarks_eval.R")
 library(tidyverse)
 
-multi_fit_ts <- function(idx, fcasts_slawek, data_st, data_x, data_x_deseason, m4_data_x_horiz) {
+multi_fit_ts <- function(idx, data_x, data_x_deseason, m4_data_x_horiz) {
   fcast_naive <- naive(data_x[[idx]], h = m4_data_x_horiz[[idx]])$mean
   fcast_seasonal_naive <-
     seasonal_naive(data_x[[idx]], fcast_horiz = m4_data_x_horiz[[idx]])
@@ -62,7 +62,6 @@ load_slawek_data <- function(output_dir) {
   split_file <- function(fname) {
     ts_split <- scan(fname, what = "", sep = "\n") %>%
       lapply(str_split, ",")
-
     fcasts <- lapply(ts_split, function(ts) return(as.numeric(ts[[1]][2:length(ts[[1]])])))
     names(fcasts) <- unlist(lapply(ts_split, function(ts) return(ts[[1]][1])))
     return(fcasts)

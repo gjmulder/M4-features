@@ -14,7 +14,7 @@ source("fcast.R")
 # Config ####
 
 if (interactive()) {
-  prop_ts <- NA #0.01
+  prop_ts <- 0.01
 } else
 {
   prop_ts <- NA
@@ -24,6 +24,7 @@ m4_freqs <- read_csv("m4_horiz.csv")
 horizons <- as.list(m4_freqs$Horizon)
 names(horizons) <- m4_freqs$SP
 err_names <- c("sMAPE", "MASE")
+slawek_output_dir <- "/home/mulderg/Work/118 - slaweks17/github/c++/output/"
 
 ###########################################################################
 # Preprocess M4 data ####
@@ -31,9 +32,9 @@ err_names <- c("sMAPE", "MASE")
 if (is.na(prop_ts)) {
   m4_data <- M4
 } else {
-  # m4_data <- Filter(function(ts)
-  #   ts$period == "Monthly", M4)
-  m4_data <- sample(M4, prop_ts * length(M4))
+  m4_data <- Filter(function(ts)
+    ts$period == "Daily", M4)
+  # m4_data <- sample(M4, prop_ts * length(M4))
 }
 
 m4_data_x <-
@@ -72,8 +73,6 @@ m4_data_xx <-
 
 print("M4 Competition data:")
 
-fcasts_slawek <- load_slawek_data(output_dir)
-
 if (use_parallel) {
   fcasts <- mclapply(
     1:length(m4_data_x),
@@ -84,13 +83,18 @@ if (use_parallel) {
     mc.cores = 16
   )
 } else {
-  fcasts <- lapply(1:length(m4_data_x),
-                   multi_fit_ts,
-                   m4_data_x,
-                   m4_data_x_deseason,
-                   m4_horiz)
+  fcasts <- lapply(
+    1:length(m4_data_x),
+    multi_fit_ts,
+    m4_data_x,
+    m4_data_x_deseason,
+    m4_horiz
+  )
 }
-fcast_names <- names(fcasts[[1]])
+
+fcasts_slawek <- load_slawek_data(slawek_output_dir)
+fcasts2 <- lapply(1:length(m4_data_x),
+                 function(idx) return(c(fcasts[[idx]], list(slawek = fcasts_slawek[[m4_st[[idx]]]]))))
 
 # ###########################################################################
 # # Compute sMAPE and MASE ####
