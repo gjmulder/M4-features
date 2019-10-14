@@ -1,0 +1,28 @@
+Yearly:
+
+       naive seasonal_naive naive2    ses   holt holt_damped theta_classic combined slawek
+sMAPE 16.342         16.342 16.342 16.398 16.535      15.163        14.603   14.874 13.173
+MASE   3.974          3.974  3.974  3.981  3.576       3.372         3.382    3.282  2.988
+OWA    1.000          1.000  1.000  1.003  0.956       0.888         0.872    0.868  0.779
+
+Daily:
+
+      naive seasonal_naive naive2   ses  holt holt_damped theta_classic combined slawek
+sMAPE 3.045          3.045  3.045 3.045 3.070       3.063         3.053    2.985  3.154
+MASE  3.278          3.278  3.278 3.281 3.231       3.234         3.262    3.205  3.416
+OWA   1.000          1.000  1.000 1.000 0.997       0.996         0.999    0.979  1.039
+
+Hourly:
+
+       naive seasonal_naive naive2    ses   holt holt_damped theta_classic combined slawek
+sMAPE 43.003         13.912 18.383 18.094 29.474      19.277        18.138   22.114  9.435
+MASE  11.608          1.193  2.395  2.385  9.380       2.947         2.455    4.585  0.941
+OWA    3.593          0.628  1.000  0.990  2.760       1.140         1.006    1.559  0.453
+
+Weekly:
+
+      naive seasonal_naive naive2   ses  holt holt_damped theta_classic combined slawek
+sMAPE 9.161          9.161  9.161 9.012 9.706       8.867         9.094    8.947  7.375
+MASE  2.777          2.777  2.777 2.685 2.413       2.400         2.637    2.429  2.245
+OWA   1.000          1.000  1.000 0.975 0.964       0.916         0.971    0.926  0.807
+

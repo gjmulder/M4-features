@@ -19,11 +19,11 @@ if (interactive()) {
 {
   prop_ts <- NA
 }
-use_parallel <- is.na(prop_ts)
+use_parallel <- TRUE #is.na(prop_ts)
 m4_freqs <- read_csv("m4_horiz.csv")
 horizons <- as.list(m4_freqs$Horizon)
 names(horizons) <- m4_freqs$SP
-err_names <- c("sMAPE", "MASE")
+err_names <- c("sMAPE", "MASE", "OWA")
 slawek_output_dir <- "/home/mulderg/Work/118 - slaweks17/github/c++/output/"
 
 ###########################################################################
@@ -33,7 +33,7 @@ if (is.na(prop_ts)) {
   m4_data <- M4
 } else {
   m4_data <- Filter(function(ts)
-    ts$period == "Daily", M4)
+    ts$period == "Weekly", M4)
   # m4_data <- sample(M4, prop_ts * length(M4))
 }
 
