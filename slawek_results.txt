@@ -1,28 +1,35 @@
 Yearly:
-
        naive seasonal_naive naive2    ses   holt holt_damped theta_classic combined slawek
 sMAPE 16.342         16.342 16.342 16.398 16.535      15.163        14.603   14.874 13.173
 MASE   3.974          3.974  3.974  3.981  3.576       3.372         3.382    3.282  2.988
 OWA    1.000          1.000  1.000  1.003  0.956       0.888         0.872    0.868  0.779
 
 Daily:
-
       naive seasonal_naive naive2   ses  holt holt_damped theta_classic combined slawek
 sMAPE 3.045          3.045  3.045 3.045 3.070       3.063         3.053    2.985  3.154
 MASE  3.278          3.278  3.278 3.281 3.231       3.234         3.262    3.205  3.416
 OWA   1.000          1.000  1.000 1.000 0.997       0.996         0.999    0.979  1.039
 
 Hourly:
-
        naive seasonal_naive naive2    ses   holt holt_damped theta_classic combined slawek
 sMAPE 43.003         13.912 18.383 18.094 29.474      19.277        18.138   22.114  9.435
 MASE  11.608          1.193  2.395  2.385  9.380       2.947         2.455    4.585  0.941
 OWA    3.593          0.628  1.000  0.990  2.760       1.140         1.006    1.559  0.453
 
 Weekly:
-
       naive seasonal_naive naive2   ses  holt holt_damped theta_classic combined slawek
 sMAPE 9.161          9.161  9.161 9.012 9.706       8.867         9.094    8.947  7.375
 MASE  2.777          2.777  2.777 2.685 2.413       2.400         2.637    2.429  2.245
 OWA   1.000          1.000  1.000 0.975 0.964       0.916         0.971    0.926  0.807
 
+Monthly:
+       naive seasonal_naive naive2    ses   holt holt_damped theta_classic combined slawek
+sMAPE 15.256         15.988 14.427 13.618 14.828      13.473        13.003   13.434 12.371
+MASE   1.205          1.260  1.063  1.020  1.010       0.972         0.970    0.966  0.898
+OWA    1.095          1.146  1.000  0.951  0.989       0.924         0.907    0.920  0.851
+
+Quarterly:
+       naive seasonal_naive naive2   ses   holt holt_damped theta_classic combined slawek
+sMAPE 11.610         12.521 11.012 10.60 10.955      10.243        10.312   10.197  9.681
+MASE   1.477          1.602  1.371  1.34  1.199       1.175         1.232    1.174  1.120
+OWA    1.066          1.153  1.000  0.97  0.935       0.893         0.917    0.891  0.848

@@ -7,19 +7,22 @@ library(gridExtra)
 library(tidyverse)
 
 set.seed(42)
-# options(warn = 2, width = 1024)
+options(warn = 2)
+options(width = 1024)
 source("fcast.R")
 
 ###########################################################################
 # Config ####
 
 if (interactive()) {
-  prop_ts <- 0.01
+  prop_ts <- NA
+  num_cores <- 2
 } else
 {
   prop_ts <- NA
+  num_cores <- 16
 }
-use_parallel <- is.na(prop_ts)
+use_parallel <- TRUE #is.na(prop_ts)
 m4_freqs <- read_csv("m4_horiz.csv")
 horizons <- as.list(m4_freqs$Horizon)
 names(horizons) <- m4_freqs$SP
@@ -30,11 +33,13 @@ slawek_output_dir <-
 ###########################################################################
 # Preprocess M4 data ####
 
+M4 <- Filter(function(ts)
+  ts$period == "Quarterly" | ts$period == "Monthly", M4)
+
 if (is.na(prop_ts)) {
   m4_data <- M4
 } else {
-  m4_data <- sample(Filter(function(ts)
-    ts$period == "Monthly", M4), prop_ts * length(M4))
+  m4_data <- sample(M4, prop_ts * length(M4))
 }
 
 m4_data_x <-
@@ -59,7 +64,7 @@ m4_horiz <-
 
 if (use_parallel) {
   m4_data_x_deseason <- mclapply(1:length(m4_data_x), function(idx)
-    return(deseasonalise(m4_data_x[[idx]], m4_horiz[[idx]])), mc.cores = 16)
+    return(deseasonalise(m4_data_x[[idx]], m4_horiz[[idx]])), mc.cores = num_cores)
 } else {
   m4_data_x_deseason <- lapply(1:length(m4_data_x), function(idx)
     return(deseasonalise(m4_data_x[[idx]], m4_horiz[[idx]])))
@@ -80,7 +85,7 @@ if (use_parallel) {
     m4_data_x,
     m4_data_x_deseason,
     m4_horiz,
-    mc.cores = 16
+    mc.cores = num_cores
   )
 } else {
   fcasts <- lapply(1:length(m4_data_x),
@@ -95,7 +100,7 @@ if (use_parallel) {
   fcasts_all <- mclapply(1:length(m4_data_x),
                          function(idx)
                            return(c(fcasts[[idx]], list(slawek = fcasts_slawek[[m4_st[[idx]]]]))),
-                         mc.cores = 16)
+                         mc.cores = num_cores)
 } else {
   fcasts_all <- lapply(1:length(m4_data_x),
                        function(idx)
@@ -113,7 +118,7 @@ if (use_parallel) {
     fcasts_all,
     m4_data_x,
     m4_data_xx,
-    mc.cores = 16
+    mc.cores = num_cores
   )
 } else {
   fcast_errs <- lapply(1:length(fcasts),
@@ -135,14 +140,14 @@ fcast_smapes_df <-
   unlist(lapply(fcast_errs,
                 function(errs)
                   return(names(which.min(
-                    errs[1, ]
+                    errs[1,]
                   )))))
 
 fcast_mases_df <-
   unlist(lapply(fcast_errs,
                 function(errs)
                   return(names(which.min(
-                    errs[2, ]
+                    errs[2,]
                   )))))
 
 m4_data_all_df <-
@@ -206,11 +211,15 @@ tt <- gridExtra::ttheme_default(
   rowhead = list(fg_params = list(cex = 0.8))
 )
 
-print(round(mean_errs_df, 3))
-write_csv(mean_errs_df, "mean_errors.csv")
-
-png(filename = "fcast_percentages.png",
-    width = 2048,
-    height = 2048)
-print(grid.table(results_df[c(7, 4, 3, 6, 1, 2, 5), ], theme = tt))
-dev.off()
+if (interactive()) {
+  print(round(mean_errs_df, 3))
+  if(!is.null(dev.list())) dev.off()
+  print(grid.table(results_df[c(7, 4, 3, 6, 1, 2, 5),], theme = tt))
+} else {
+  write_csv(mean_errs_df, "results/mean_errors.csv")
+  png(filename = "results/fcast_percentages.png",
+      width = 2048,
+      height = 2048)
+  print(grid.table(results_df[c(7, 4, 3, 6, 1, 2, 5),], theme = tt))
+  dev.off()
+}
