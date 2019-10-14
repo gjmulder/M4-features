@@ -33,7 +33,7 @@ if (is.na(prop_ts)) {
   m4_data <- M4
 } else {
   m4_data <- Filter(function(ts)
-    ts$period == "Weekly", M4)
+    ts$period == "Monthly", M4)
   # m4_data <- sample(M4, prop_ts * length(M4))
 }
 
