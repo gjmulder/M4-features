@@ -60,7 +60,7 @@ multi_fit_ts <- function(idx, data_x, data_x_deseason, m4_data_x_horiz) {
 
 load_slawek_data <- function(output_dir) {
   split_file <- function(fname) {
-    ts_split <- scan(fname, what = "", sep = "\n", quiet = TRUE) %>%
+    ts_split <- scan(fname, skip = 1, what = "", sep = "\n", quiet = TRUE) %>%
       lapply(str_split, ",")
     fcasts <- lapply(ts_split, function(ts) return(as.numeric(ts[[1]][2:length(ts[[1]])])))
     names(fcasts) <- unlist(lapply(ts_split, function(ts) return(ts[[1]][1])))
@@ -68,7 +68,7 @@ load_slawek_data <- function(output_dir) {
   }
   ll <- do.call(c, lapply(Sys.glob(
     paste0(output_dir, "/*/*.csv")), split_file))
-  stopifnot(length(ll) == 28000L)
+  stopifnot(length(ll) == 72000L)
   return(ll)
 }
 
