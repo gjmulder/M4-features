@@ -62,8 +62,9 @@ load_slawek_data <- function(output_dir) {
   split_file <- function(fname) {
     ts_split <- scan(fname, skip = 1, what = "", sep = "\n", quiet = TRUE) %>%
       lapply(str_split, ",")
+    # browser()
     fcasts <- lapply(ts_split, function(ts) return(as.numeric(ts[[1]][2:length(ts[[1]])])))
-    names(fcasts) <- unlist(lapply(ts_split, function(ts) return(ts[[1]][1])))
+    names(fcasts) <- unlist(lapply(ts_split, function(ts) return(gsub('"', '', ts[[1]][1]))))
     return(fcasts)
   }
   ll <- do.call(c, lapply(Sys.glob(

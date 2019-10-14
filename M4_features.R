@@ -19,7 +19,7 @@ if (interactive()) {
 {
   prop_ts <- NA
 }
-use_parallel <- TRUE #is.na(prop_ts)
+use_parallel <- is.na(prop_ts)
 m4_freqs <- read_csv("m4_horiz.csv")
 horizons <- as.list(m4_freqs$Horizon)
 names(horizons) <- m4_freqs$SP
@@ -33,9 +33,8 @@ slawek_output_dir <-
 if (is.na(prop_ts)) {
   m4_data <- M4
 } else {
-  m4_data <- Filter(function(ts)
-    ts$period == "Monthly", M4)
-  # m4_data <- sample(M4, prop_ts * length(M4))
+  m4_data <- sample(Filter(function(ts)
+    ts$period == "Monthly", M4), prop_ts * length(M4))
 }
 
 m4_data_x <-
