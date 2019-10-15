@@ -15,14 +15,14 @@ source("fcast.R")
 # Config ####
 
 if (interactive()) {
-  prop_ts <- 0.1
+  prop_ts <- NA
   num_cores <- 2
 } else
 {
   prop_ts <- NA
   num_cores <- 16
 }
-use_parallel <- FALSE #is.na(prop_ts)
+use_parallel <- TRUE #is.na(prop_ts)
 m4_freqs <- read_csv("m4_horiz.csv")
 horizons <- as.list(m4_freqs$Horizon)
 names(horizons) <- m4_freqs$SP
@@ -113,6 +113,7 @@ fcast_names <- names(fcasts_all[[1]])
 ###########################################################################
 # Compute sMAPE and MASE ####
 
+print("Computing error metrics:")
 if (use_parallel) {
   fcast_errs <- mclapply(
     1:length(fcasts),
@@ -138,31 +139,36 @@ mean_errs_df <-
         colMeans(mean_errs_df / mean_errs_df$naive2))
 rownames(mean_errs_df) <- err_names
 
-fcast_smapes_df <-
+vs_holt <-
   unlist(lapply(fcast_errs,
                 function(errs)
-                  return(names(which.min(
-                    errs[1,]
-                  )))))
+                  return(errs[1, "holt"] - errs[1, "slawek"])))
 
-fcast_mases_df <-
+vs_theta <-
   unlist(lapply(fcast_errs,
                 function(errs)
-                  return(names(which.min(
-                    errs[2,]
-                  )))))
+                  return(errs[1, "theta_classic"] - errs[1, "slawek"])))
 
 m4_data_all_df <-
   tibble(
-    best_mases = fcast_mases_df,
-    best_smapes = fcast_smapes_df,
+    vs_holt = vs_holt,
+    vs_theta = vs_theta,
     type = as.character(unlist(m4_type)),
     period = as.character(unlist(m4_period))
   )
 
-prop_str <- function(x) {
-  pt <- round(100 * prop.table(table(x)), 1)
-  return(paste0(names(pt), sprintf(":%5.1f%%", pt), "\n", collapse = ''))
+build_str <- function(vs_holt, vs_theta) {
+  names <-
+    c("vs_holt_mean",
+      "vs_holt_sd",
+      "vs_theta_mean",
+      "vs_theta_sd")
+  percs <-
+    c(round(mean(vs_holt) * 100, 1),
+      round(sd(vs_holt) * 100, 1),
+      round(mean(vs_theta) * 100, 1),
+      round(sd(vs_theta) * 100, 1))
+  return(paste0(names, sprintf(":%5.1f%%", percs), "\n", collapse = ''))
 }
 
 ###########################################################################
@@ -170,26 +176,26 @@ prop_str <- function(x) {
 
 m4_data_all_df %>%
   group_by(type, period) %>%
-  summarise(data = prop_str(best_mases)) ->
+  summarise(data = build_str(vs_holt, vs_theta)) ->
   m4_type_period_df
 
 m4_data_all_df %>%
   group_by(type) %>%
-  summarise(data = prop_str(best_mases)) %>%
+  summarise(data = build_str(vs_holt, vs_theta)) %>%
   mutate(period = "Total") ->
   m4_type_df
 
 m4_data_all_df %>%
-  summarise(data = prop_str(best_mases)) %>%
+  group_by(period) %>%
+  summarise(data = build_str(vs_holt, vs_theta)) %>%
+  mutate(type = "Total") ->
+  m4_period_df
+
+m4_data_all_df %>%
+  summarise(data = build_str(vs_holt, vs_theta)) %>%
   mutate(period = "Total") %>%
   mutate(type = "Total") ->
   m4_total_df
-
-m4_data_all_df %>%
-  group_by(period) %>%
-  summarise(data = prop_str(best_mases)) %>%
-  mutate(type = "Total") ->
-  m4_period_df
 
 bind_rows(m4_type_period_df, m4_type_df, m4_period_df, m4_total_df) %>%
   spread(type, data) %>%
@@ -207,20 +213,40 @@ results_df <- as.data.frame(results_df)
 rownames(results_df) <- results_df$period
 results_df$period <- NULL
 
-tt <- gridExtra::ttheme_default(
-  core = list(fg_params = list(cex = 0.8)),
-  colhead = list(fg_params = list(cex = 0.8)),
-  rowhead = list(fg_params = list(cex = 0.8))
-)
-
 print(round(mean_errs_df, 3))
-if(!is.null(dev.list())) dev.off()
-print(grid.table(results_df[c(7, 4, 3, 6, 1, 2, 5),], theme = tt))
-if (! interactive()) {
+if (!is.null(dev.list()))
+  dev.off()
+print(grid.table(results_df[c(7, 4, 3, 6, 1, 2, 5), ], theme = tt))
+
+gg_holt <-
+  ggplot(tibble(vs_holt = vs_holt)) +
+  geom_histogram(aes(x = vs_holt), bins = 100) +
+  scale_y_sqrt() +
+  ggtitle("Histogram of (Holt Classic MAPE - Slawek MAPE) for Monthly and Quarterly (72K TS)")
+# print(gg_holt)
+
+gg_theta <-
+  ggplot(tibble(vs_theta = vs_theta)) +
+  geom_histogram(aes(x = vs_theta), bins = 100) +
+  scale_y_sqrt() +
+  ggtitle("Histogram of (Theta CLassic - Slawek MAPE) for Monthly and Quarterly (72K TS)")
+# print(gg_theta)
+
+if (!interactive()) {
   write_csv(mean_errs_df, "results/mean_errors.csv")
   png(filename = "results/fcast_percentages.png",
       width = 2048,
       height = 2048)
-  print(grid.table(results_df[c(7, 4, 3, 6, 1, 2, 5),], theme = tt))
+  tt <- gridExtra::ttheme_default(
+    core = list(fg_params = list(cex = 0.8)),
+    colhead = list(fg_params = list(cex = 0.8)),
+    rowhead = list(fg_params = list(cex = 0.8))
+  )  print(grid.table(results_df[c(7, 4, 3, 6, 1, 2, 5), ], theme = tt))
   dev.off()
+
+  write.csv(as.data.frame(table(round(vs_holt))), "results/holt_mape_sub_slawek_mape_freqs.csv", row.names = FALSE)
+  ggsave("holt_mape_sub_slawek_mape_histo.png", gg_holt)
+
+  write.csv(as.data.frame(table(round(vs_theta))), "results/theta_mape_sub_slawek_mape_freqs.csv", row.names = FALSE)
+  ggsave("theta_mape_sub_slawek_mape_histo.png", gg_theta)
 }
