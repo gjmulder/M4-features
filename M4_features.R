@@ -95,8 +95,7 @@ if (use_parallel) {
                    m4_horiz)
 }
 
-fcasts_all <- fcasts
-
+# fcasts_all <- fcasts
 fcasts_slawek <- load_slawek_data(slawek_output_dir)
 if (use_parallel) {
   fcasts_all <- mclapply(1:length(m4_data_x),
@@ -213,7 +212,9 @@ results_df <- as.data.frame(results_df)
 rownames(results_df) <- results_df$period
 results_df$period <- NULL
 
-print(round(mean_errs_df, 3))
+###########################################################################
+# Report data and plots ####
+
 if (!is.null(dev.list()))
   dev.off()
 print(grid.table(results_df[c(7, 4, 3, 6, 1, 2, 5), ], theme = tt))
@@ -231,6 +232,11 @@ gg_theta <-
   scale_y_sqrt() +
   ggtitle("Histogram of (Theta CLassic - Slawek MAPE) for Monthly and Quarterly (72K TS)")
 # print(gg_theta)
+
+print(round(mean_errs_df, 3))
+
+###########################################################################
+# Batch write to ./results ####
 
 if (!interactive()) {
   write_csv(mean_errs_df, "results/mean_errors.csv")
