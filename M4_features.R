@@ -15,14 +15,14 @@ source("fcast.R")
 # Config ####
 
 if (interactive()) {
-  prop_ts <- NA
+  prop_ts <- 0.1
   num_cores <- 2
 } else
 {
   prop_ts <- NA
   num_cores <- 16
 }
-use_parallel <- TRUE #is.na(prop_ts)
+use_parallel <- FALSE #is.na(prop_ts)
 m4_freqs <- read_csv("m4_horiz.csv")
 horizons <- as.list(m4_freqs$Horizon)
 names(horizons) <- m4_freqs$SP
@@ -94,6 +94,8 @@ if (use_parallel) {
                    m4_data_x_deseason,
                    m4_horiz)
 }
+
+fcasts_all <- fcasts
 
 fcasts_slawek <- load_slawek_data(slawek_output_dir)
 if (use_parallel) {
@@ -211,11 +213,10 @@ tt <- gridExtra::ttheme_default(
   rowhead = list(fg_params = list(cex = 0.8))
 )
 
-if (interactive()) {
-  print(round(mean_errs_df, 3))
-  if(!is.null(dev.list())) dev.off()
-  print(grid.table(results_df[c(7, 4, 3, 6, 1, 2, 5),], theme = tt))
-} else {
+print(round(mean_errs_df, 3))
+if(!is.null(dev.list())) dev.off()
+print(grid.table(results_df[c(7, 4, 3, 6, 1, 2, 5),], theme = tt))
+if (! interactive()) {
   write_csv(mean_errs_df, "results/mean_errors.csv")
   png(filename = "results/fcast_percentages.png",
       width = 2048,
