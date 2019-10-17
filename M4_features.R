@@ -15,7 +15,7 @@ source("fcast.R")
 # Config ####
 
 if (interactive()) {
-  prop_ts <- NA
+  prop_ts <- 0.01
   num_cores <- 2
 } else
 {
@@ -69,6 +69,7 @@ if (use_parallel) {
   m4_data_x_deseason <- lapply(1:length(m4_data_x), function(idx)
     return(deseasonalise(m4_data_x[[idx]], m4_horiz[[idx]])))
 }
+
 m4_data_xx <-
   lapply(m4_data, function(ts)
     return(ts$xx))
@@ -217,7 +218,7 @@ results_df$period <- NULL
 
 if (!is.null(dev.list()))
   dev.off()
-print(grid.table(results_df[c(7, 4, 3, 6, 1, 2, 5), ], theme = tt))
+print(grid.table(results_df[c(7, 4, 3, 6, 1, 2, 5),], theme = tt))
 
 gg_holt <-
   ggplot(tibble(vs_holt = vs_holt)) +
@@ -247,12 +248,21 @@ if (!interactive()) {
     core = list(fg_params = list(cex = 0.8)),
     colhead = list(fg_params = list(cex = 0.8)),
     rowhead = list(fg_params = list(cex = 0.8))
-  )  print(grid.table(results_df[c(7, 4, 3, 6, 1, 2, 5), ], theme = tt))
+  )
+  print(grid.table(results_df[c(7, 4, 3, 6, 1, 2, 5),], theme = tt))
   dev.off()
 
-  write.csv(as.data.frame(table(round(vs_holt))), "results/holt_mape_sub_slawek_mape_freqs.csv", row.names = FALSE)
+  write.csv(
+    as.data.frame(table(round(vs_holt))),
+    "results/holt_mape_sub_slawek_mape_freqs.csv",
+    row.names = FALSE
+  )
   ggsave("holt_mape_sub_slawek_mape_histo.png", gg_holt)
 
-  write.csv(as.data.frame(table(round(vs_theta))), "results/theta_mape_sub_slawek_mape_freqs.csv", row.names = FALSE)
+  write.csv(
+    as.data.frame(table(round(vs_theta))),
+    "results/theta_mape_sub_slawek_mape_freqs.csv",
+    row.names = FALSE
+  )
   ggsave("theta_mape_sub_slawek_mape_histo.png", gg_theta)
 }
