@@ -2,6 +2,7 @@ library(M4comp2018)
 # library(parallel)
 library(lubridate)
 library(tidyverse)
+library(jsonlite)
 
 set.seed(42)
 options(warn = 2)
@@ -16,7 +17,7 @@ horizons <- as.list(m4_freqs$Horizon)
 names(horizons) <- m4_freqs$SP
 
 if (interactive()) {
-  prop_ts <- 0.01
+  prop_ts <- NA
   num_cores <- 2
 } else
 {
@@ -28,8 +29,9 @@ use_parallel <- TRUE #is.na(prop_ts)
 ###########################################################################
 # Preprocess M4 data ####
 
-# M4 <- Filter(function(ts)
-#   ts$period == "Quarterly" | ts$period == "Monthly", M4)
+period <- "Yearly"
+M4 <- Filter(function(ts)
+  ts$period == period, M4)
 
 if (is.na(prop_ts)) {
   m4_data <- M4
@@ -56,7 +58,6 @@ m4_type <-
 ###########################################################################
 # Split M4 data ####
 
-periods <- as.vector(levels(m4_data[[1]]$period))
 
 m4_train <-
   lapply(1:length(m4_data), function(idx)
@@ -67,6 +68,31 @@ m4_test <-
       length(m4_data_x[[idx]]) - m4_horiz[[idx]] + 1
     ))))
 
-write_ts <- function(train, test, type) {
-  ts_list <- lapply()
+ts_to_json <- function(idx, ts, type) {
+  return(paste0(toJSON(
+    list(
+      start = "1750-01-01 00:00:00",
+      target = ts[[idx]],
+      feat_static_cat = c(as.numeric(type[[idx]]))
+    ),
+    auto_unbox = TRUE
+  ), "\n"))
 }
+
+write_json <- function(period, train, test, type) {
+  dirname <-
+    paste0("~/.mxnet/gluon-ts/datasets/m4_", tolower(period), '/')
+  json <- lapply(1:length(train), ts_to_json, train, type)
+  sink(paste0(dirname, "train/data.json"))
+  lapply(json, cat)
+  sink()
+
+  json <- lapply(1:length(test), ts_to_json, test, type)
+  sink(paste0(dirname, "test/data.json"))
+  lapply(json, cat)
+  sink()
+  return(length(test))
+}
+
+# periods <- as.vector(levels(m4_data[[1]]$period))
+lapply(period, write_json, m4_train, m4_test, m4_type)
