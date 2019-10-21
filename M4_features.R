@@ -140,63 +140,58 @@ mean_errs_df <-
         colMeans(mean_errs_df / mean_errs_df$naive2))
 rownames(mean_errs_df) <- err_names
 
-vs_holt <-
-  unlist(lapply(fcast_errs,
-                function(errs)
-                  return(errs[1, "holt"] - errs[1, "slawek"])))
+###########################################################################
+# Generate percentage best method table for each period and type ####
 
-vs_theta <-
+fcast_smapes_df <-
   unlist(lapply(fcast_errs,
                 function(errs)
-                  return(errs[1, "theta_classic"] - errs[1, "slawek"])))
+                  return(names(which.min(
+                    errs[1,]
+                  )))))
+
+fcast_mases_df <-
+  unlist(lapply(fcast_errs,
+                function(errs)
+                  return(names(which.min(
+                    errs[2,]
+                  )))))
 
 m4_data_all_df <-
   tibble(
-    vs_holt = vs_holt,
-    vs_theta = vs_theta,
+    best_mases = fcast_mases_df,
+    best_smapes = fcast_smapes_df,
     type = as.character(unlist(m4_type)),
     period = as.character(unlist(m4_period))
   )
 
-build_str <- function(vs_holt, vs_theta) {
-  names <-
-    c("vs_holt_mean",
-      "vs_holt_sd",
-      "vs_theta_mean",
-      "vs_theta_sd")
-  percs <-
-    c(round(mean(vs_holt) * 100, 1),
-      round(sd(vs_holt) * 100, 1),
-      round(mean(vs_theta) * 100, 1),
-      round(sd(vs_theta) * 100, 1))
-  return(paste0(names, sprintf(":%5.1f%%", percs), "\n", collapse = ''))
+prop_str <- function(x) {
+  pt <- round(100 * prop.table(table(x)), 1)
+  return(paste0(names(pt), sprintf(":%5.1f%%", pt), "\n", collapse = ''))
 }
-
-###########################################################################
-# Generate percentage best method table for each period and type ####
 
 m4_data_all_df %>%
   group_by(type, period) %>%
-  summarise(data = build_str(vs_holt, vs_theta)) ->
+  summarise(data = prop_str(best_smapes)) ->
   m4_type_period_df
 
 m4_data_all_df %>%
   group_by(type) %>%
-  summarise(data = build_str(vs_holt, vs_theta)) %>%
+  summarise(data = prop_str(best_smapes)) %>%
   mutate(period = "Total") ->
   m4_type_df
 
 m4_data_all_df %>%
-  group_by(period) %>%
-  summarise(data = build_str(vs_holt, vs_theta)) %>%
-  mutate(type = "Total") ->
-  m4_period_df
-
-m4_data_all_df %>%
-  summarise(data = build_str(vs_holt, vs_theta)) %>%
+  summarise(data = prop_str(best_smapes)) %>%
   mutate(period = "Total") %>%
   mutate(type = "Total") ->
   m4_total_df
+
+m4_data_all_df %>%
+  group_by(period) %>%
+  summarise(data = prop_str(best_smapes)) %>%
+  mutate(type = "Total") ->
+  m4_period_df
 
 bind_rows(m4_type_period_df, m4_type_df, m4_period_df, m4_total_df) %>%
   spread(type, data) %>%
