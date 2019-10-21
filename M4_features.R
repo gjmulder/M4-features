@@ -214,20 +214,25 @@ results_df <- as.data.frame(results_df)
 rownames(results_df) <- results_df$period
 results_df$period <- NULL
 
+pct_freq <- function(pct, vec) {
+  tab <- table(round(vec/pct))
+  names(tab) <- as.numeric(names(tab))*pct
+  return(tab)
+}
 ###########################################################################
 # Report data and plots ####
 
 print(round(mean_errs_df, 3))
 
-if (!is.null(dev.list()))
-  grid.newpage()
-
-tt <- ttheme_default(
-  core = list(fg_params = list(cex = 0.8)),
-  colhead = list(fg_params = list(cex = 0.8)),
-  rowhead = list(fg_params = list(cex = 0.8))
-)
-print(grid.table(results_df[c(7, 4, 3, 6, 1, 2, 5),]))
+# if (!is.null(dev.list()))
+#   grid.newpage()
+#
+# tt <- ttheme_default(
+#   core = list(fg_params = list(cex = 0.8)),
+#   colhead = list(fg_params = list(cex = 0.8)),
+#   rowhead = list(fg_params = list(cex = 0.8))
+# )
+# print(grid.table(results_df[c(7, 4, 3, 6, 1, 2, 5),]))
 
 # gg_holt <-
 #   ggplot(tibble(vs_holt = vs_holt)) +
@@ -247,24 +252,25 @@ print(grid.table(results_df[c(7, 4, 3, 6, 1, 2, 5),]))
 # Batch write to ./results ####
 
 if (!interactive()) {
-  write_csv(mean_errs_df, "results/mean_errors.csv")
-  png(filename = "results/fcast_percentages.png",
-      width = 2048,
-      height = 2048)
-  print(grid.table(results_df[c(7, 4, 3, 6, 1, 2, 5),]))
-  dev.off()
+  # write_csv(mean_errs_df, "results/mean_errors.csv")
+  # png(filename = "results/fcast_percentages.png",
+  #     width = 2048,
+  #     height = 2048)
+  # print(grid.table(results_df[c(7, 4, 3, 6, 1, 2, 5),]))
+  # dev.off()
 
-  # write.csv(
-  #   as.data.frame(table(round(vs_holt))),
-  #   "results/holt_mape_sub_slawek_mape_freqs.csv",
-  #   row.names = FALSE
-  # )
+  vs_holt_freqs <- table(round(vs_holt))
+  write.csv(
+    as.data.frame(table(round(vs_holt))),
+    "results/holt_mape_sub_slawek_mape_freqs.csv",
+    row.names = FALSE
+  )
   # ggsave("holt_mape_sub_slawek_mape_histo.png", gg_holt)
-  #
-  # write.csv(
-  #   as.data.frame(table(round(vs_theta))),
-  #   "results/theta_mape_sub_slawek_mape_freqs.csv",
-  #   row.names = FALSE
-  # )
+
+  write.csv(
+    as.data.frame(table(round(vs_theta))),
+    "results/theta_mape_sub_slawek_mape_freqs.csv",
+    row.names = FALSE
+  )
   # ggsave("theta_mape_sub_slawek_mape_histo.png", gg_theta)
 }
