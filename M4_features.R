@@ -140,6 +140,9 @@ mean_errs_df <-
         colMeans(mean_errs_df / mean_errs_df$naive2))
 rownames(mean_errs_df) <- err_names
 
+# fcasts_idx <- c(1:length(fcasts_all))[(unlist(m4_period) == "Weekly") & (unlist(m4_type) == "Other")]
+# bind_rows(lapply(fcasts_idx, function(idx) return(fcast_errs[[idx]][1,])))
+
 ###########################################################################
 # Generate percentage best method table for each period and type ####
 
