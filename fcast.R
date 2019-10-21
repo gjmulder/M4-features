@@ -87,7 +87,7 @@ load_slawek_data <- function(output_dir) {
   ll <- do.call(c, lapply(Sys.glob(paste0(
     output_dir, "/*/*.csv"
   )), split_file))
-  stopifnot(length(ll) == 72000L)
+  stopifnot(length(ll) == 100000L)
   return(ll)
 }
 

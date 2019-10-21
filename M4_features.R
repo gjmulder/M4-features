@@ -2,6 +2,7 @@ library(M4comp2018)
 library(tsfeatures)
 library(parallel)
 # library(GGally)
+library(grid)
 library(gridExtra)
 # library(ggplot2)
 library(tidyverse)
@@ -15,8 +16,8 @@ source("fcast.R")
 # Config ####
 
 if (interactive()) {
-  prop_ts <- 0.01
-  num_cores <- 2
+  prop_ts <- NA
+  num_cores <- 16
 } else
 {
   prop_ts <- NA
@@ -33,8 +34,8 @@ slawek_output_dir <-
 ###########################################################################
 # Preprocess M4 data ####
 
-M4 <- Filter(function(ts)
-  ts$period == "Quarterly" | ts$period == "Monthly", M4)
+# M4 <- Filter(function(ts)
+#   ts$period == "Hourly", M4)
 
 if (is.na(prop_ts)) {
   m4_data <- M4
@@ -216,25 +217,31 @@ results_df$period <- NULL
 ###########################################################################
 # Report data and plots ####
 
-if (!is.null(dev.list()))
-  dev.off()
-print(grid.table(results_df[c(7, 4, 3, 6, 1, 2, 5),], theme = tt))
-
-gg_holt <-
-  ggplot(tibble(vs_holt = vs_holt)) +
-  geom_histogram(aes(x = vs_holt), bins = 100) +
-  scale_y_sqrt() +
-  ggtitle("Histogram of (Holt Classic MAPE - Slawek MAPE) for Monthly and Quarterly (72K TS)")
-# print(gg_holt)
-
-gg_theta <-
-  ggplot(tibble(vs_theta = vs_theta)) +
-  geom_histogram(aes(x = vs_theta), bins = 100) +
-  scale_y_sqrt() +
-  ggtitle("Histogram of (Theta CLassic - Slawek MAPE) for Monthly and Quarterly (72K TS)")
-# print(gg_theta)
-
 print(round(mean_errs_df, 3))
+
+if (!is.null(dev.list()))
+  grid.newpage()
+
+tt <- ttheme_default(
+  core = list(fg_params = list(cex = 0.8)),
+  colhead = list(fg_params = list(cex = 0.8)),
+  rowhead = list(fg_params = list(cex = 0.8))
+)
+print(grid.table(results_df[c(7, 4, 3, 6, 1, 2, 5),]))
+
+# gg_holt <-
+#   ggplot(tibble(vs_holt = vs_holt)) +
+#   geom_histogram(aes(x = vs_holt), bins = 100) +
+#   scale_y_sqrt() +
+#   ggtitle("Histogram of (Holt Classic MAPE - Slawek MAPE) for Monthly and Quarterly (72K TS)")
+# # print(gg_holt)
+
+# gg_theta <-
+#   ggplot(tibble(vs_theta = vs_theta)) +
+#   geom_histogram(aes(x = vs_theta), bins = 100) +
+#   scale_y_sqrt() +
+#   ggtitle("Histogram of (Theta CLassic - Slawek MAPE) for Monthly and Quarterly (72K TS)")
+# print(gg_theta)
 
 ###########################################################################
 # Batch write to ./results ####
@@ -244,25 +251,20 @@ if (!interactive()) {
   png(filename = "results/fcast_percentages.png",
       width = 2048,
       height = 2048)
-  tt <- gridExtra::ttheme_default(
-    core = list(fg_params = list(cex = 0.8)),
-    colhead = list(fg_params = list(cex = 0.8)),
-    rowhead = list(fg_params = list(cex = 0.8))
-  )
-  print(grid.table(results_df[c(7, 4, 3, 6, 1, 2, 5),], theme = tt))
+  print(grid.table(results_df[c(7, 4, 3, 6, 1, 2, 5),]))
   dev.off()
 
-  write.csv(
-    as.data.frame(table(round(vs_holt))),
-    "results/holt_mape_sub_slawek_mape_freqs.csv",
-    row.names = FALSE
-  )
-  ggsave("holt_mape_sub_slawek_mape_histo.png", gg_holt)
-
-  write.csv(
-    as.data.frame(table(round(vs_theta))),
-    "results/theta_mape_sub_slawek_mape_freqs.csv",
-    row.names = FALSE
-  )
-  ggsave("theta_mape_sub_slawek_mape_histo.png", gg_theta)
+  # write.csv(
+  #   as.data.frame(table(round(vs_holt))),
+  #   "results/holt_mape_sub_slawek_mape_freqs.csv",
+  #   row.names = FALSE
+  # )
+  # ggsave("holt_mape_sub_slawek_mape_histo.png", gg_holt)
+  #
+  # write.csv(
+  #   as.data.frame(table(round(vs_theta))),
+  #   "results/theta_mape_sub_slawek_mape_freqs.csv",
+  #   row.names = FALSE
+  # )
+  # ggsave("theta_mape_sub_slawek_mape_histo.png", gg_theta)
 }
