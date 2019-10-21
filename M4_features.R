@@ -146,14 +146,14 @@ rownames(mean_errs_df) <- err_names
 fcast_smapes_df <-
   unlist(lapply(fcast_errs,
                 function(errs)
-                  return(names(which.min(
+                  return(names(which.max(
                     errs[1,]
                   )))))
 
 fcast_mases_df <-
   unlist(lapply(fcast_errs,
                 function(errs)
-                  return(names(which.min(
+                  return(names(which.max(
                     errs[2,]
                   )))))
 
