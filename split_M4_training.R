@@ -1,24 +1,20 @@
 library(M4comp2018)
-# library(parallel)
+library(parallel)
 library(lubridate)
 library(tidyverse)
 library(jsonlite)
+library(forecast)
 
 set.seed(42)
 options(warn = 2)
 options(width = 1024)
-source("fcast.R")
 
 ###########################################################################
 # Config ####
 
-m4_freqs <- read_csv("m4_horiz.csv")
-horizons <- as.list(m4_freqs$Horizon)
-names(horizons) <- m4_freqs$SP
-
 if (interactive()) {
   prop_ts <- NA
-  num_cores <- 2
+  num_cores <- 6
 } else
 {
   prop_ts <- NA
@@ -29,70 +25,59 @@ use_parallel <- TRUE #is.na(prop_ts)
 ###########################################################################
 # Preprocess M4 data ####
 
-period <- "Yearly"
-M4 <- Filter(function(ts)
-  ts$period == period, M4)
-
 if (is.na(prop_ts)) {
   m4_data <- M4
 } else {
   m4_data <- sample(M4, prop_ts * length(M4))
 }
 
-m4_data_x <-
-  lapply(m4_data, function(ts)
-    return(ts$x))
-
-m4_period <-
-  lapply(m4_data, function(ts)
-    return(ts$period))
-
-m4_horiz <-
-  lapply(1:length(m4_data_x), function(idx)
-    return(horizons[[as.character(m4_period[[idx]])]]))
-
-m4_type <-
-  lapply(m4_data, function(ts)
-    return(ts$type))
-
-###########################################################################
-# Split M4 data ####
-
-
-m4_train <-
-  lapply(1:length(m4_data), function(idx)
-    return(subset(m4_data_x[[idx]], end = length(m4_data_x[[idx]]) - m4_horiz[[idx]])))
-m4_test <-
-  lapply(1:length(m4_data), function(idx)
-    return(subset(m4_data_x[[idx]], start = (
-      length(m4_data_x[[idx]]) - m4_horiz[[idx]] + 1
-    ))))
-
-ts_to_json <- function(idx, ts, type) {
-  return(paste0(toJSON(
+ts_to_json <- function(idx, dat, typ) {
+  json <- (paste0(toJSON(
     list(
       start = "1750-01-01 00:00:00",
-      target = ts[[idx]],
-      feat_static_cat = c(as.numeric(type[[idx]]))
+      target = dat[[idx]],
+      feat_static_cat = c(as.numeric(typ[[idx]]))
     ),
     auto_unbox = TRUE
   ), "\n"))
+  return(json)
 }
 
-write_json <- function(period, train, test, type) {
+process_period <- function(period, m4_data) {
+  print(period)
   dirname <-
     paste0("~/.mxnet/gluon-ts/datasets/m4_", tolower(period), '/')
-  json <- lapply(1:length(train), ts_to_json, train, type)
+
+  m4_period_data <- Filter(function(ts)
+    ts$period == period, m4_data)
+
+  m4_type <-
+    lapply(m4_period_data, function(ts)
+      return(ts$type))
+
+  m4_train <-
+    lapply(m4_period_data, function(ts)
+      return(subset(ts$x, end = (length(ts$x) - ts$h))))
+
+  json <- lapply(1:length(m4_train), ts_to_json, m4_train, m4_type)
   sink(paste0(dirname, "train/data.json"))
   lapply(json, cat)
   sink()
 
-  json <- lapply(1:length(test), ts_to_json, test, type)
+  m4_test <-
+    lapply(m4_period_data, function(ts)
+      return(subset(ts$x, start = (length(ts$x) - ts$h + 1))))
+
+  json <- lapply(1:length(m4_test), ts_to_json, m4_test, m4_type)
   sink(paste0(dirname, "test/data.json"))
   lapply(json, cat)
   sink()
-  return(length(test))
+
+  return(length(m4_test))
 }
 
-# periods <- as.vector(levels(m4_data[[1]]$period))
-lapply(period, write_json, m4_train, m4_test, m4_type)
+periods <- as.vector(levels(m4_data[[1]]$period))
+res <- unlist(lapply(periods, process_period, M4))
+names(res) <- periods
+print(res)
+print(sum(res))
