@@ -94,5 +94,5 @@ write_json <- function(period, train, test, type) {
   return(length(test))
 }
 
-# periods <- as.vector(levels(m4_data[[1]]$period))
-lapply(period, write_json, m4_train, m4_test, m4_type)
+periods <- as.vector(levels(m4_data[[1]]$period))
+lapply(periods, write_json, m4_train, m4_test, m4_type)
