@@ -66,7 +66,7 @@ process_period <- function(period, m4_data) {
 
   m4_test <-
     lapply(m4_period_data, function(ts)
-      return(subset(ts$x, start = (length(ts$x) - ts$h + 1))))
+      return(ts$x))
 
   json <- lapply(1:length(m4_test), ts_to_json, m4_test, m4_type)
   sink(paste0(dirname, "test/data.json"))
