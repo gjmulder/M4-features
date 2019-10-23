@@ -6,9 +6,10 @@ library(grid)
 library(gridExtra)
 # library(ggplot2)
 library(tidyverse)
+library(RColorBrewer)
 
 set.seed(42)
-options(warn = 2)
+options(warn = 0)
 options(width = 1024)
 source("fcast.R")
 
@@ -17,16 +18,16 @@ source("fcast.R")
 
 if (interactive()) {
   prop_ts <- NA
-  num_cores <- 16
+  num_cores <- 4
 } else
 {
   prop_ts <- NA
   num_cores <- 16
 }
 use_parallel <- TRUE #is.na(prop_ts)
-m4_freqs <- read_csv("m4_horiz.csv")
-horizons <- as.list(m4_freqs$Horizon)
-names(horizons) <- m4_freqs$SP
+# m4_freqs <- read_csv("m4_horiz.csv")
+# horizons <- as.list(m4_freqs$Horizon)
+# names(horizons) <- m4_freqs$SP
 err_names <- c("sMAPE", "MASE", "OWA")
 slawek_output_dir <-
   "/home/mulderg/Work/118 - slaweks17/github/c++/output/"
@@ -60,8 +61,8 @@ m4_period <-
     return(ts$period))
 
 m4_horiz <-
-  lapply(1:length(m4_data_x), function(idx)
-    return(horizons[[as.character(m4_period[[idx]])]]))
+  lapply(m4_data, function(ts)
+    return(ts$h))
 
 if (use_parallel) {
   m4_data_x_deseason <- mclapply(1:length(m4_data_x), function(idx)
@@ -140,137 +141,173 @@ mean_errs_df <-
         colMeans(mean_errs_df / mean_errs_df$naive2))
 rownames(mean_errs_df) <- err_names
 
-vs_holt <-
-  unlist(lapply(fcast_errs,
-                function(errs)
-                  return(errs[1, "holt"] - errs[1, "slawek"])))
+fcast_smapes <-
+  bind_rows(lapply(fcast_errs, function(errs)
+    return(errs[1, ])))
 
-vs_theta <-
-  unlist(lapply(fcast_errs,
-                function(errs)
-                  return(errs[1, "theta_classic"] - errs[1, "slawek"])))
+fcast_smapes %>%
+  mutate_all(sd) ->
+  fcast_smapes_sd
 
-m4_data_all_df <-
-  tibble(
-    vs_holt = vs_holt,
-    vs_theta = vs_theta,
-    type = as.character(unlist(m4_type)),
-    period = as.character(unlist(m4_period))
-  )
+mtx <-
+  as.matrix(fcast_smapes) / as.matrix(fcast_smapes_sd)
 
-build_str <- function(vs_holt, vs_theta) {
-  names <-
-    c("vs_holt_mean",
-      "vs_holt_sd",
-      "vs_theta_mean",
-      "vs_theta_sd")
-  percs <-
-    c(round(mean(vs_holt) * 100, 1),
-      round(sd(vs_holt) * 100, 1),
-      round(mean(vs_theta) * 100, 1),
-      round(sd(vs_theta) * 100, 1))
-  return(paste0(names, sprintf(":%5.1f%%", percs), "\n", collapse = ''))
-}
+as_tibble(mtx) %>%
+  gather(method, sMAPE) ->
+  standardised_smapes
 
-###########################################################################
-# Generate percentage best method table for each period and type ####
+gg <-
+  ggplot(standardised_smapes) +
+  geom_freqpoly(aes(x = sMAPE, colour = method), bins = 100) +
+  geom_vline(aes(xintercept = 0.33), colour = "red") +
+  geom_vline(aes(xintercept = 1.0), linetype="dashed") +
+  geom_vline(aes(xintercept = 2.0), linetype="dashed") +
+  geom_vline(aes(xintercept = 3.0), linetype="dashed") +
+  geom_vline(aes(xintercept = 4.0), linetype="dashed") +
+  geom_vline(aes(xintercept = 5.0), linetype="dashed") +
+  geom_vline(aes(xintercept = 6.0), linetype="dashed") +
+  geom_vline(aes(xintercept = 7.0), linetype="dashed") +
+  geom_vline(aes(xintercept = 8.0), linetype="dashed") +
+  geom_vline(aes(xintercept = 9.0), linetype="dashed") +
+  scale_x_log10() +
+  scale_y_log10() +
+  xlab("Standardised sMAPE (log scale)") +
+  ylab("Count (log scale)") +
+  ggtitle("Histogram plot of M4 forecast method sMAPEs (log scales)") +
+  scale_color_brewer(palette = "Paired")
+print(gg)
 
-m4_data_all_df %>%
-  group_by(type, period) %>%
-  summarise(data = build_str(vs_holt, vs_theta)) ->
-  m4_type_period_df
-
-m4_data_all_df %>%
-  group_by(type) %>%
-  summarise(data = build_str(vs_holt, vs_theta)) %>%
-  mutate(period = "Total") ->
-  m4_type_df
-
-m4_data_all_df %>%
-  group_by(period) %>%
-  summarise(data = build_str(vs_holt, vs_theta)) %>%
-  mutate(type = "Total") ->
-  m4_period_df
-
-m4_data_all_df %>%
-  summarise(data = build_str(vs_holt, vs_theta)) %>%
-  mutate(period = "Total") %>%
-  mutate(type = "Total") ->
-  m4_total_df
-
-bind_rows(m4_type_period_df, m4_type_df, m4_period_df, m4_total_df) %>%
-  spread(type, data) %>%
-  select(Micro,
-         Industry,
-         Macro,
-         Finance,
-         Demographic,
-         Other,
-         Total,
-         period) ->
-  results_df
-
-results_df <- as.data.frame(results_df)
-rownames(results_df) <- results_df$period
-results_df$period <- NULL
-
-pct_freq <- function(pct, vec) {
-  tab <- table(round(vec/pct))
-  names(tab) <- as.numeric(names(tab))*pct
-  return(tab)
-}
-###########################################################################
-# Report data and plots ####
-
-print(round(mean_errs_df, 3))
-
-# if (!is.null(dev.list()))
-#   grid.newpage()
+# vs_holt <-
+#   unlist(lapply(fcast_errs,
+#                 function(errs)
+#                   return(errs[1, "holt"] - errs[1, "slawek"])))
 #
-# tt <- ttheme_default(
-#   core = list(fg_params = list(cex = 0.8)),
-#   colhead = list(fg_params = list(cex = 0.8)),
-#   rowhead = list(fg_params = list(cex = 0.8))
-# )
-# print(grid.table(results_df[c(7, 4, 3, 6, 1, 2, 5),]))
-
-# gg_holt <-
-#   ggplot(tibble(vs_holt = vs_holt)) +
-#   geom_histogram(aes(x = vs_holt), bins = 100) +
-#   scale_y_sqrt() +
-#   ggtitle("Histogram of (Holt Classic MAPE - Slawek MAPE) for Monthly and Quarterly (72K TS)")
-# # print(gg_holt)
-
-# gg_theta <-
-#   ggplot(tibble(vs_theta = vs_theta)) +
-#   geom_histogram(aes(x = vs_theta), bins = 100) +
-#   scale_y_sqrt() +
-#   ggtitle("Histogram of (Theta CLassic - Slawek MAPE) for Monthly and Quarterly (72K TS)")
-# print(gg_theta)
-
-###########################################################################
-# Batch write to ./results ####
-
-if (!interactive()) {
-  # write_csv(mean_errs_df, "results/mean_errors.csv")
-  # png(filename = "results/fcast_percentages.png",
-  #     width = 2048,
-  #     height = 2048)
-  # print(grid.table(results_df[c(7, 4, 3, 6, 1, 2, 5),]))
-  # dev.off()
-
-  vs_holt_freqs <- table(round(vs_holt))
-  write.csv(
-    as.data.frame(table(round(vs_holt))),
-    "results/holt_mape_sub_slawek_mape_freqs.csv",
-    row.names = FALSE
-  )
-  # ggsave("holt_mape_sub_slawek_mape_histo.png", gg_holt)
-
-  write.csv(
-    as.data.frame(table(round(vs_theta))),
-    "results/theta_mape_sub_slawek_mape_freqs.csv",
-    row.names = FALSE
-  )
-  # ggsave("theta_mape_sub_slawek_mape_histo.png", gg_theta)
-}
+# vs_theta <-
+#   unlist(lapply(fcast_errs,
+#                 function(errs)
+#                   return(errs[1, "theta_classic"] - errs[1, "slawek"])))
+#
+# m4_data_all_df <-
+#   tibble(
+#     vs_holt = vs_holt,
+#     vs_theta = vs_theta,
+#     type = as.character(unlist(m4_type)),
+#     period = as.character(unlist(m4_period))
+#   )
+#
+# build_str <- function(vs_holt, vs_theta) {
+#   names <-
+#     c("vs_holt_mean",
+#       "vs_holt_sd",
+#       "vs_theta_mean",
+#       "vs_theta_sd")
+#   percs <-
+#     c(round(mean(vs_holt) * 100, 1),
+#       round(sd(vs_holt) * 100, 1),
+#       round(mean(vs_theta) * 100, 1),
+#       round(sd(vs_theta) * 100, 1))
+#   return(paste0(names, sprintf(":%5.1f%%", percs), "\n", collapse = ''))
+# }
+#
+# ###########################################################################
+# # Generate percentage best method table for each period and type ####
+#
+# m4_data_all_df %>%
+#   group_by(type, period) %>%
+#   summarise(data = build_str(vs_holt, vs_theta)) ->
+#   m4_type_period_df
+#
+# m4_data_all_df %>%
+#   group_by(type) %>%
+#   summarise(data = build_str(vs_holt, vs_theta)) %>%
+#   mutate(period = "Total") ->
+#   m4_type_df
+#
+# m4_data_all_df %>%
+#   group_by(period) %>%
+#   summarise(data = build_str(vs_holt, vs_theta)) %>%
+#   mutate(type = "Total") ->
+#   m4_period_df
+#
+# m4_data_all_df %>%
+#   summarise(data = build_str(vs_holt, vs_theta)) %>%
+#   mutate(period = "Total") %>%
+#   mutate(type = "Total") ->
+#   m4_total_df
+#
+# bind_rows(m4_type_period_df, m4_type_df, m4_period_df, m4_total_df) %>%
+#   spread(type, data) %>%
+#   select(Micro,
+#          Industry,
+#          Macro,
+#          Finance,
+#          Demographic,
+#          Other,
+#          Total,
+#          period) ->
+#   results_df
+#
+# results_df <- as.data.frame(results_df)
+# rownames(results_df) <- results_df$period
+# results_df$period <- NULL
+#
+# pct_freq <- function(pct, vec) {
+#   tab <- table(round(vec/pct))
+#   names(tab) <- as.numeric(names(tab))*pct
+#   return(tab)
+# }
+# ###########################################################################
+# # Report data and plots ####
+#
+# print(round(mean_errs_df, 3))
+#
+# # if (!is.null(dev.list()))
+# #   grid.newpage()
+# #
+# # tt <- ttheme_default(
+# #   core = list(fg_params = list(cex = 0.8)),
+# #   colhead = list(fg_params = list(cex = 0.8)),
+# #   rowhead = list(fg_params = list(cex = 0.8))
+# # )
+# # print(grid.table(results_df[c(7, 4, 3, 6, 1, 2, 5),]))
+#
+# # gg_holt <-
+# #   ggplot(tibble(vs_holt = vs_holt)) +
+# #   geom_histogram(aes(x = vs_holt), bins = 100) +
+# #   scale_y_sqrt() +
+# #   ggtitle("Histogram of (Holt Classic MAPE - Slawek MAPE) for Monthly and Quarterly (72K TS)")
+# # # print(gg_holt)
+#
+# # gg_theta <-
+# #   ggplot(tibble(vs_theta = vs_theta)) +
+# #   geom_histogram(aes(x = vs_theta), bins = 100) +
+# #   scale_y_sqrt() +
+# #   ggtitle("Histogram of (Theta CLassic - Slawek MAPE) for Monthly and Quarterly (72K TS)")
+# # print(gg_theta)
+#
+# ###########################################################################
+# # Batch write to ./results ####
+#
+# if (!interactive()) {
+#   # write_csv(mean_errs_df, "results/mean_errors.csv")
+#   # png(filename = "results/fcast_percentages.png",
+#   #     width = 2048,
+#   #     height = 2048)
+#   # print(grid.table(results_df[c(7, 4, 3, 6, 1, 2, 5),]))
+#   # dev.off()
+#
+#   vs_holt_freqs <- table(round(vs_holt))
+#   write.csv(
+#     as.data.frame(table(round(vs_holt))),
+#     "results/holt_mape_sub_slawek_mape_freqs.csv",
+#     row.names = FALSE
+#   )
+#   # ggsave("holt_mape_sub_slawek_mape_histo.png", gg_holt)
+#
+#   write.csv(
+#     as.data.frame(table(round(vs_theta))),
+#     "results/theta_mape_sub_slawek_mape_freqs.csv",
+#     row.names = FALSE
+#   )
+#   # ggsave("theta_mape_sub_slawek_mape_histo.png", gg_theta)
+# }

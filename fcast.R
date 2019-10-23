@@ -85,7 +85,7 @@ load_slawek_data <- function(output_dir) {
     return(fcasts)
   }
   ll <- do.call(c, lapply(Sys.glob(paste0(
-    output_dir, "/*/*.csv"
+    output_dir, "/*/*Forec.csv"
   )), split_file))
   stopifnot(length(ll) == 100000L)
   return(ll)
