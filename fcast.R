@@ -1,4 +1,5 @@
 library(forecast)
+library(Metrics)
 source("benchmarks_eval.R")
 library(tidyverse)
 
@@ -97,13 +98,23 @@ load_slawek_data <- function(output_dir) {
 compute_fcast_errs <- function(idx, fcasts_x, data_x, data_xx) {
   mean_smape <-
     lapply(fcasts_x[[idx]], function(fcast)
-      return(mean(smape(fcast, data_xx[[idx]]))))
+      return(mean(m4_smape(fcast, data_xx[[idx]]))))
   mean_mase <-
     lapply(fcasts_x[[idx]], function(fcast)
-      return(mean(mase(
+      return(mean(m4_mase(
         fcast, data_x[[idx]], data_xx[[idx]]
       ))))
-  mean_errs <- bind_rows(mean_smape, mean_mase)
+  mean_mae <-
+    lapply(fcasts_x[[idx]], function(fcast)
+      return(mean(mae(data_xx[[idx]], fcast))))
+  mean_me <-
+    lapply(fcasts_x[[idx]], function(fcast)
+      return(mean(fcast - data_xx[[idx]])))
+  # mean_acf1 <-
+  #   lapply(fcasts_x[[idx]], function(fcast)
+  #     return(mean(Acf(fcast, lag.max = 1, plot = FALSE))))
+  mean_errs <- bind_rows(mean_smape, mean_mase, mean_mae, mean_me)
+  # browser()
   return(mean_errs)
 }
 
@@ -112,5 +123,11 @@ mean_fcast_errs <- function(fcast_name, fcast_errs) {
     return(fcast_errs[[idx]][[fcast_name]][1])))
   mases <- unlist(lapply(1:length(fcast_errs), function(idx)
     return(fcast_errs[[idx]][[fcast_name]][2])))
-  return(c(mean(smapes), mean(mases)))
+  maes <- unlist(lapply(1:length(fcast_errs), function(idx)
+    return(fcast_errs[[idx]][[fcast_name]][3])))
+  mes <- unlist(lapply(1:length(fcast_errs), function(idx)
+    return(fcast_errs[[idx]][[fcast_name]][4])))
+  # acf1s <- unlist(lapply(1:length(fcast_errs), function(idx)
+  #   return(fcast_errs[[idx]][[fcast_name]][4])))
+  return(c(mean(smapes), mean(mases), mean(maes), mean(mes)))
 }

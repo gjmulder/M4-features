@@ -1,24 +1,25 @@
 library(M4comp2018)
-library(tsfeatures)
+# library(tsfeatures)
 library(parallel)
 # library(GGally)
-library(grid)
-library(gridExtra)
-# library(ggplot2)
-library(tidyverse)
+# library(grid)
+# library(gridExtra)
 library(RColorBrewer)
+library(jmotif)
+
+source("fcast.R")
+library(tidyverse)
 
 set.seed(42)
 options(warn = 0)
 options(width = 1024)
-source("fcast.R")
 
 ###########################################################################
 # Config ####
 
 if (interactive()) {
   prop_ts <- NA
-  num_cores <- 4
+  num_cores <- 3
 } else
 {
   prop_ts <- NA
@@ -28,7 +29,7 @@ use_parallel <- TRUE #is.na(prop_ts)
 # m4_freqs <- read_csv("m4_horiz.csv")
 # horizons <- as.list(m4_freqs$Horizon)
 # names(horizons) <- m4_freqs$SP
-err_names <- c("sMAPE", "MASE", "OWA")
+err_names <- c("sMAPE", "MASE", "MAE", "ME", "OWA")
 slawek_output_dir <-
   "/home/mulderg/Work/118 - slaweks17/github/c++/output/"
 
@@ -141,40 +142,40 @@ mean_errs_df <-
         colMeans(mean_errs_df / mean_errs_df$naive2))
 rownames(mean_errs_df) <- err_names
 
-fcast_smapes <-
-  bind_rows(lapply(fcast_errs, function(errs)
-    return(errs[1, ])))
+###########################################################################
 
-fcast_smapes %>%
-  mutate_all(sd) ->
-  fcast_smapes_sd
+fcast_name <- "slawek"
+err_name <- "ME"
 
-mtx <-
-  as.matrix(fcast_smapes) / as.matrix(fcast_smapes_sd)
+unlist(lapply(fcast_errs, function(errs)
+  return(errs[which(err_names == err_name), fcast_name]))) ->
+  fcast_err_vec
 
-as_tibble(mtx) %>%
-  gather(method, sMAPE) ->
-  standardised_smapes
+sds <-
+  round(-5:5)
+
+# print(gghistogram(fcast_smapes, add.normal = TRUE, add.kde = TRUE, add.rug = TRUE))
+
+fcast_err_znorm <-
+  znorm(fcast_err_vec)
 
 gg <-
-  ggplot(standardised_smapes) +
-  geom_freqpoly(aes(x = sMAPE, colour = method), bins = 100) +
-  geom_vline(aes(xintercept = 0.33), colour = "red") +
-  geom_vline(aes(xintercept = 1.0), linetype="dashed") +
-  geom_vline(aes(xintercept = 2.0), linetype="dashed") +
-  geom_vline(aes(xintercept = 3.0), linetype="dashed") +
-  geom_vline(aes(xintercept = 4.0), linetype="dashed") +
-  geom_vline(aes(xintercept = 5.0), linetype="dashed") +
-  geom_vline(aes(xintercept = 6.0), linetype="dashed") +
-  geom_vline(aes(xintercept = 7.0), linetype="dashed") +
-  geom_vline(aes(xintercept = 8.0), linetype="dashed") +
-  geom_vline(aes(xintercept = 9.0), linetype="dashed") +
-  scale_x_log10() +
+  ggplot(tibble(sMAPE = fcast_err_znorm[fcast_err_znorm > -15 & fcast_err_znorm < 15])) +
+  stat_bin(aes(x=sMAPE), bins=1000) +
+  # geom_vline(aes(xintercept = 0.33), colour = "red") +
+  # scale_x_log10() +
   scale_y_log10() +
-  xlab("Standardised sMAPE (log scale)") +
+  xlab(paste0(err_name, " (s.d.)")) +
   ylab("Count (log scale)") +
-  ggtitle("Histogram plot of M4 forecast method sMAPEs (log scales)") +
-  scale_color_brewer(palette = "Paired")
+  ggtitle(paste0("Histogram plot of ", err_name, " for forecast method: ", fcast_name)) +
+  # scale_color_brewer(palette = "Paired") +
+  theme_classic(base_size = 22)
+
+for (sd_line in sds) {
+  print(sd_line)
+  gg <-
+    gg + eval(parse(text=paste0("geom_vline(aes(xintercept = ", sd_line, "), linetype='dashed')")))
+}
 print(gg)
 
 # vs_holt <-

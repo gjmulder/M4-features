@@ -4,7 +4,7 @@
 
 library(forecast) #Requires v8.2
 
-smape <- function(fcast, out_sample) {
+m4_smape <- function(fcast, out_sample) {
   # Used to estimate sMAPE
   out_sample <- as.numeric(out_sample)
   fcast <- as.numeric(fcast)
@@ -12,7 +12,7 @@ smape <- function(fcast, out_sample) {
   return(smape)
 }
 
-mase <- function(fcast, in_sample, out_sample) {
+m4_mase <- function(fcast, in_sample, out_sample) {
   # Used to estimate MASE
   freq <- frequency(in_sample)
   fcast_naive_sd <- rep(NA, freq)
