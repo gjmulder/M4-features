@@ -16,23 +16,29 @@ imagenet %>%
   arrange(YEAR) ->
   imagenet_top_year
 
-print(imagenet_top_year)
+tibble(
+  year = deframe(imagenet_top_year[2:nrow(imagenet_top_year), "YEAR"]),
+  method = deframe(imagenet_top_year[2:nrow(imagenet_top_year), "METHOD"]),
+  accuracy.score.last = deframe(imagenet_top_year[1:(nrow(imagenet_top_year) - 1), "Accuracy"]),
+  year.diff = diff(imagenet_top_year$YEAR),
+  accuracy.score.diff = diff(imagenet_top_year$Accuracy)
+) %>%
+  mutate(yoy.percentage = 100 * accuracy.score.diff / year.diff  / accuracy.score.last) ->
+  imagenet_top_year_diff
 
-imagenet_top_year %>%
-  ggplot(aes(x = YEAR, y = Accuracy)) +
+imagenet_top_year_diff %>%
+  ggplot(aes(x = year, y = yoy.percentage)) +
   geom_col(width = 0.5, fill = "blue") +
   ggtitle("ImageNet Top-5 Accuracies") +
-  ylab("% accuracy") +
+  ylab("Your-on-year % improvement") +
   xlab("Year model was published") +
   geom_text(
-    aes(y = 50, label = METHOD),
+    aes(y = 4, label = method),
     colour = "black", size = 5, angle = 90
   ) +
-  geom_hline(aes(yintercept = 95), colour = "red", linetype = "dashed") +
-  geom_text(aes(y = 97, x = 2012.5), label = "Human level performance") +
-  geom_smooth(method = "lm", colour = "black", se = FALSE) +
-  ylim(0, 100) -> gg
-
+  # geom_hline(aes(yintercept = 95), colour = "red", linetype = "dashed") +
+  # geom_text(aes(y = 97, x = 2012.5), label = "Human level performance") +
+  geom_smooth(method = "lm", colour = "black", se = FALSE) -> gg
 print(gg)
 
 wmt14 %>%
@@ -45,14 +51,24 @@ wmt14 %>%
   arrange(YEAR) ->
   wmt14_top_year
 
-wmt14_top_year %>%
-  ggplot(aes(x = YEAR, y = `BLEU SCORE`)) +
+tibble(
+  year = deframe(wmt14_top_year[2:nrow(wmt14_top_year), "YEAR"]),
+  method = deframe(wmt14_top_year[2:nrow(wmt14_top_year), "METHOD"]),
+  bleu.score.last = deframe(wmt14_top_year[1:(nrow(wmt14_top_year) - 1), "BLEU SCORE"]),
+  year.diff = diff(wmt14_top_year$YEAR),
+  bleu.score.diff = diff(wmt14_top_year$`BLEU SCORE`)
+) %>%
+  mutate(yoy.percentage = 100 * bleu.score.diff / year.diff  / bleu.score.last) ->
+  wmt14_top_year_diff
+
+wmt14_top_year_diff %>%
+  ggplot(aes(x = year, y = yoy.percentage)) +
   geom_col(width = 0.5, fill = "blue") +
   ggtitle("WMT English to French Machine Translation") +
-  ylab("BLEU Score") +
+  ylab("Year-on-year % improvement") +
   xlab("Year model was published") +
   geom_text(
-    aes(y = 20, label = METHOD),
+    aes(y = 2, label = method),
     colour = "black", size = 5, angle = 90
   ) +
   geom_smooth(method = "lm", colour = "black", se = FALSE) ->
