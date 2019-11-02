@@ -1,0 +1,35 @@
+RANK,METHOD,"BLEU SCORE",YEAR
+1,"Transformer Big + BT",45.6,2018
+2,"Local Joint Self-attention",43.3,2019
+3,"depth growing",43.27,2019
+4,"Transformer Big",43.2,2018
+5,DynamicConv,43.2,2019
+6,LightConv,43.1,2019
+7,"Transformer Big + MoS",42.1,2018
+8,"Transformer (big)",41.5,2018
+9,"Weighted Transformer (large)",41.4,2017
+10,"ConvS2S (ensemble)",41.3,2017
+11,"Evolved Transformer Big",41.3,2019
+12,RNMT+,41,2018
+13,"Transformer Big",41,2017
+14,"Evolved Transformer Base",40.6,2019
+15,MoE,40.56,2017
+16,ConvS2S,40.46,2017
+17,GNMT+RL,39.9,2016
+18,"Deep-Att + PosUnk",39.2,2016
+19,"Transformer Base",38.1,2017
+20,"LSTM6 + PosUnk",37.5,2014
+22,SMT+LSTM5,36.5,2014
+23,RNN-search50*,36.2,2014
+24,Deep-Att,35.9,2016
+25,"Deep Convolutional Encoder; single-layer decoder",35.7,2016
+26,LSTM,34.8,2014
+27,"CSLM + RNN + WP",34.54,2014
+28,"Regularized LSTM",29.03,2014
+29,"Unsupervised PBSMT",28.11,2018
+30,"PBSMT + NMT",27.6,2018
+31,GRU+Attention,26.4,2016
+32,"SMT + iterative backtranslation (unsupervised)",26.22,2018
+33,"Unsupervised NMT + Transformer",25.14,2018
+34,ByteNet,23.8,2016
+35,"Unsupervised attentional encoder-decoder + BPE",14.36,2017
