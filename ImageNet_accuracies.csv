@@ -1,114 +1,114 @@
-Rank,Method,"TOP 1 Accuracy","Top 5 Accuracy",Year
-1,"FixResNeXt-101 32x48d",0.8640000000000001,0.98,2019
-2,"ResNeXt-101 32x48d",0.8540000000000001,0.976,2018
-3,"ResNeXt-101 32x32d",0.851,0.975,2018
-4,"EfficientNet-B7 (RandAugment)",0.85,0.972,2019
-5,"ResNeXt-101 32x16d (semi-weakly sup.)",0.848,,2019
-6,EfficientNet-B7,0.8440000000000001,0.971,2019
-7,GPIPE,0.843,0.97,2018
-8,"ResNeXt-101 32x8d (semi-weakly sup.)",0.843,,2019
-9,"ResNeXt-101 32×16d",0.8420000000000001,0.972,2018
-10,EfficientNet-B6,0.84,0.9690000000000001,2019
-11,AmoebaNet-A,0.8390000000000001,0.966,2018
-12,FixPNASNet-5,0.8370000000000001,0.968,2019
-13,"MultiGrain PNASNet (500px)",0.836,0.9670000000000001,2019
-14,"ResNeXt-101 32x4d (semi-weakly sup.)",0.8340000000000001,,2019
-15,EfficientNet-B5,0.833,0.9670000000000001,2019
-16,"MultiGrain SENet154 (400px)",0.83,0.965,2019
-17,"Oct-ResNet-152 (SE)",0.8290000000000001,0.963,2019
-18,PNASNet-5,0.8290000000000001,0.9620000000000001,2017
-19,"NASNET-A (6)",0.8270000000000001,0.9620000000000001,2017
-20,SENet-154,0.8270000000000001,0.9620000000000001,2017
-21,EfficientNet-B4,0.826,0.963,2019
-22,"FixResNet-50 Billion",0.825,0.966,2019
-23,SCARLET-A4,0.823,0.96,2019
-24,"ResNeXt-101 32x8d",0.8220000000000001,0.9640000000000001,2018
-25,"DPN-131 (320x320, Mean-Max Pooling)",0.8145,0.9584,2017
-26,"DPN-131 (320x320)",0.8138,0.9577,2017
-27,PolyNet,0.813,0.958,2016
-28,"DPN-98 (320x320, Mean-Max Pooling)",0.8128,0.956,2017
-29,"ResNet-50 (semi-weakly sup.)",0.812,,2019
-30,EfficientNet-B3,0.8109999999999999,0.955,2019
-31,"DPN-98 (320x320)",0.8106,0.9556,2017
-32,"DPN-92 (320x320, Mean-Max Pooling)",0.8096,0.9547,2017
-33,"ResNeXt-101 64x4",0.809,0.956,2016
-34,"DPN-92 (320x320)",0.8066,0.9534,2017
-35,"Inception ResNet V2",0.8009999999999999,0.951,2016
-36,RandWire-WS,0.8009999999999999,0.948,2019
-37,"DPN-131 (224x224)",0.8007,0.9488,2017
-38,"DPN-98 (224x224)",0.7995,0.9484999999999999,2017
-39,ScaleNet-152,0.7994,0.9481999999999999,2019
-40,ResNet-200,0.799,0.9520000000000001,2016
-41,"Modified Aligned Xception",0.7981,0.9483,2018
-42,SKNet-101,0.7981,,2019
-43,"FixResNet-50 CutMix",0.7979999999999999,0.9490000000000001,2019
-44,EfficientNet-B2,0.7979999999999999,0.9490000000000001,2019
-45,Res2Net-DLA-60,0.7947,,2019
-46,"MultiGrain R50-AA-500",0.794,0.948,2019
-47,"DPN-92 (224x224)",0.7927,0.9462999999999999,2017
-48,DenseNet-264,0.792,0.9470999999999999,2016
-49,"JFT-300M Finetuning",0.792,0.9470000000000001,2017
-50,ScaleNet-101,0.7918000000000001,0.9458,2019
-51,AA-ResNet-152,0.7909999999999999,0.946,2019
-52,FixResNet-50,0.7909999999999999,0.946,2019
-53,Xception,0.79,0.945,2016
-54,"ResNet-152 + SWA",78.94,,2018
-55,"ECA-Net (ResNet-152)",0.7892,0.9455,2019
-56,MixNet-L,0.789,0.9420000000000001,2019
-57,"Inception V3",0.7879999999999999,0.9440000000000001,2015
-58,EfficientNet-B1,0.7879999999999999,0.9440000000000001,2019
-59,SGE-ResNet101,0.78798,0.94368,2019
-60,"ECA-Net (ResNet-101)",0.7865000000000001,0.9434,2019
-61,ResNet-152,0.7857,0.9429000000000001,2015
-62,DenseNet-201,0.7854000000000001,0.9445999999999999,2016
-63,"DPN-68 (320x320, Mean-Max Pooling)",0.7848999999999999,0.9448000000000001,2017
-64,SRM-ResNet-101,0.7847,,2019
-65,"DenseNet-161 + SWA",78.44,,2018
-66,"ResNet-50 (CutMix)",0.784,,2019
-67,ResNet-101,0.7825,0.9395,2015
-68,"MultiGrain R50-AA-224",0.782,0.9390000000000001,2019
-69,WRN-50-2-bottleneck,0.7809999999999999,0.9397,2016
-70,DenseNet-169,0.7792,0.9408,2016
-71,"DPN-68 (320x320)",0.7785,0.941,2017
-72,"ECA-Net (ResNet-50)",0.7748,0.9368000000000001,2019
-73,ResNet-50-D,0.7716,0.9351999999999999,2018
-74,ResNet-50,0.7715000000000001,0.9329000000000001,2015
-75,MixNet-M,0.77,0.9329999999999999,2019
-76,SCARLET-A,0.769,0.934,2019
-77,MnasNet-A3,0.767,0.9329999999999999,2018
-78,"DPN-68 (224x224)",0.7643000000000001,0.9307,2017
-79,DenseNet-121,0.7639,0.9334,2016
-80,EfficientNet-B0,0.763,0.932,2019
-81,SCARLET-B,0.763,0.93,2019
-82,MoGA-A,0.759,0.9279999999999999,2019
-83,DenseNAS-A,0.759,0.9259999999999999,2019
-84,FractalNet-34,0.7587999999999999,0.9261,2016
-85,MixNet-S,0.758,0.9279999999999999,2019
-86,"CoordConv ResNet-50",0.7574,0.9275,2018
-87,PReLU-Net,0.7573000000000001,0.9262,2015
-88,LR-Net-26,0.757,0.9259999999999999,2019
-89,MnasNet-A2,0.7559999999999999,0.927,2018
-90,SCARLET-C,0.7559999999999999,0.9259999999999999,2019
-91,"ShuffleNet V2",0.754,,2018
-92,MnasNet-A1,0.752,0.925,2018
-93,"MobileNet V3-Large 1.0",0.752,,2019
-94,"MultiGrain NASNet-A-Mobile (350px)",0.7509999999999999,0.925,2019
-95,DiCENet,0.7509999999999999,,2019
-96,"Single-Path NAS",0.7495999999999999,0.9220999999999999,2019
-97,ESPNetv2,0.7490000000000001,,2018
-98,FBNet-C,0.7490000000000001,,2018
-99,"Inception V2",0.748,0.922,2015
-100,"MobileNetV2 (1.4)",0.747,,2018
-101,VGG-19,0.745,0.92,2014
-102,VGG-16,0.7440000000000001,0.919,2014
-103,"MobileNet-224 (CGD)",0.7256,0.9092,2019
-104,"ECA-Net (MobileNetV2)",0.7256,0.9081,2019
-105,SPPNet,0.7214,0.9186,2014
-106,MSRA,0.7132,0.8905,2014
-107,ShuffleNet,0.7090000000000001,0.898,2017
-108,MobileNet-224,0.706,0.895,2017
-109,"Inception V1",0.698,0.899,2014
-110,"Five Base + Five HiRes",0.6629999999999999,0.863,2013
-111,"OverFeat - 7 accurate models",0.6604000000000001,0.8676,2013
-112,ZFNet,0.64,0.853,2013
-113,"AlexNet - 7CNNs",0.633,0.846,2012
+RANK,METHOD,"TOP 1 ACCURACY","TOP 5 ACCURACY","NUMBER OF PARAMS","EXTRA TRAINING DATA","PAPER TITLE",YEAR,PAPER,CODE
+1,"FixResNeXt-101 32x48d",0.8640000000000001,0.98,829M,,"Fixing the train-test resolution discrepancy",2019,,
+2,"ResNeXt-101 32x48d",0.8540000000000001,0.976,829M,,"Exploring the Limits of Weakly Supervised Pretraining",2018,,
+3,"ResNeXt-101 32x32d",0.851,0.975,466M,,"Exploring the Limits of Weakly Supervised Pretraining",2018,,
+4,"EfficientNet-B7 (RandAugment)",0.85,0.972,66M,,"RandAugment: Practical data augmentation with no separate search",2019,,
+5,"ResNeXt-101 32x16d (semi-weakly sup.)",0.848,,,,"Billion-scale semi-supervised learning for image classification",2019,,
+6,EfficientNet-B7,0.8440000000000001,0.971,66M,,"EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks",2019,,
+7,GPIPE,0.843,0.97,557M,,"GPipe: Efficient Training of Giant Neural Networks using Pipeline Parallelism",2018,,
+8,"ResNeXt-101 32x8d (semi-weakly sup.)",0.843,,,,"Billion-scale semi-supervised learning for image classification",2019,,
+9,"ResNeXt-101 32×16d",0.8420000000000001,0.972,194M,,"Exploring the Limits of Weakly Supervised Pretraining",2018,,
+10,EfficientNet-B6,0.84,0.9690000000000001,43M,,"EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks",2019,,
+11,AmoebaNet-A,0.8390000000000001,0.966,469M,,"Regularized Evolution for Image Classifier Architecture Search",2018,,
+12,FixPNASNet-5,0.8370000000000001,0.968,86.1M,,"Fixing the train-test resolution discrepancy",2019,,
+13,"MultiGrain PNASNet (500px)",0.836,0.9670000000000001,86M,,"MultiGrain: a unified image embedding for classes and instances",2019,,
+14,"ResNeXt-101 32x4d (semi-weakly sup.)",0.8340000000000001,,,,"Billion-scale semi-supervised learning for image classification",2019,,
+15,EfficientNet-B5,0.833,0.9670000000000001,30M,,"EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks",2019,,
+16,"MultiGrain SENet154 (400px)",0.83,0.965,86M,,"MultiGrain: a unified image embedding for classes and instances",2019,,
+17,"Oct-ResNet-152 (SE)",0.8290000000000001,0.963,67M,,"Drop an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks with Octave Convolution",2019,,
+18,PNASNet-5,0.8290000000000001,0.9620000000000001,86.1M,,"Progressive Neural Architecture Search",2017,,
+19,"NASNET-A (6)",0.8270000000000001,0.9620000000000001,89M,,"Learning Transferable Architectures for Scalable Image Recognition",2017,,
+20,SENet-154,0.8270000000000001,0.9620000000000001,146M,,"Squeeze-and-Excitation Networks",2017,,
+21,EfficientNet-B4,0.826,0.963,19M,,"EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks",2019,,
+22,"FixResNet-50 Billion",0.825,0.966,25.6M,,"Fixing the train-test resolution discrepancy",2019,,
+23,SCARLET-A4,0.823,0.96,27.8M,,"ScarletNAS: Bridging the Gap Between Scalability and Fairness in Neural Architecture Search",2019,,
+24,"ResNeXt-101 32x8d",0.8220000000000001,0.9640000000000001,88M,,"Exploring the Limits of Weakly Supervised Pretraining",2018,,
+25,"DPN-131 (320x320, Mean-Max Pooling)",0.8145,0.9584,80M,,"Dual Path Networks",2017,,
+26,"DPN-131 (320x320)",0.8138,0.9577,80M,,"Dual Path Networks",2017,,
+27,PolyNet,0.813,0.958,92M,,"PolyNet: A Pursuit of Structural Diversity in Very Deep Networks",2016,,
+28,"DPN-98 (320x320, Mean-Max Pooling)",0.8128,0.956,,,"Dual Path Networks",2017,,
+29,"ResNet-50 (semi-weakly sup.)",0.812,,,,"Billion-scale semi-supervised learning for image classification",2019,,
+30,EfficientNet-B3,0.8109999999999999,0.955,12M,,"EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks",2019,,
+31,"DPN-98 (320x320)",0.8106,0.9556,,,"Dual Path Networks",2017,,
+32,"DPN-92 (320x320, Mean-Max Pooling)",0.8096,0.9547,,,"Dual Path Networks",2017,,
+33,"ResNeXt-101 64x4",0.809,0.956,83.6M,,"Aggregated Residual Transformations for Deep Neural Networks",2016,,
+34,"DPN-92 (320x320)",0.8066,0.9534,,,"Dual Path Networks",2017,,
+35,"Inception ResNet V2",0.8009999999999999,0.951,55.8M,,"Inception-v4, Inception-ResNet and the Impact of Residual Connections on Learning",2016,,
+36,RandWire-WS,0.8009999999999999,0.948,,,"Exploring Randomly Wired Neural Networks for Image Recognition",2019,,
+37,"DPN-131 (224x224)",0.8007,0.9488,80M,,"Dual Path Networks",2017,,
+38,"DPN-98 (224x224)",0.7995,0.9484999999999999,,,"Dual Path Networks",2017,,
+39,ScaleNet-152,0.7994,0.9481999999999999,,,"Data-Driven Neuron Allocation for Scale Aggregation Networks",2019,,
+40,ResNet-200,0.799,0.9520000000000001,,,"Identity Mappings in Deep Residual Networks",2016,,
+41,"Modified Aligned Xception",0.7981,0.9483,,,"Encoder-Decoder with Atrous Separable Convolution for Semantic Image Segmentation",2018,,
+42,SKNet-101,0.7981,,,,"Selective Kernel Networks",2019,,
+43,"FixResNet-50 CutMix",0.7979999999999999,0.9490000000000001,25.6M,,"Fixing the train-test resolution discrepancy",2019,,
+44,EfficientNet-B2,0.7979999999999999,0.9490000000000001,9.2M,,"EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks",2019,,
+45,Res2Net-DLA-60,0.7947,,,,"Res2Net: A New Multi-scale Backbone Architecture",2019,,
+46,"MultiGrain R50-AA-500",0.794,0.948,,,"MultiGrain: a unified image embedding for classes and instances",2019,,
+47,"DPN-92 (224x224)",0.7927,0.9462999999999999,,,"Dual Path Networks",2017,,
+48,DenseNet-264,0.792,0.9470999999999999,,,"Densely Connected Convolutional Networks",2016,,
+49,"JFT-300M Finetuning",0.792,0.9470000000000001,,,"Revisiting Unreasonable Effectiveness of Data in Deep Learning Era",2017,,
+50,ScaleNet-101,0.7918000000000001,0.9458,,,"Data-Driven Neuron Allocation for Scale Aggregation Networks",2019,,
+51,AA-ResNet-152,0.7909999999999999,0.946,,,"Attention Augmented Convolutional Networks",2019,,
+52,FixResNet-50,0.7909999999999999,0.946,25.6M,,"Fixing the train-test resolution discrepancy",2019,,
+53,Xception,0.79,0.945,22.8M,,"Xception: Deep Learning with Depthwise Separable Convolutions",2016,,
+54,"ResNet-152 + SWA",78.94,,,,"Averaging Weights Leads to Wider Optima and Better Generalization",2018,,
+55,"ECA-Net (ResNet-152)",0.7892,0.9455,57.40M,,"ECA-Net: Efficient Channel Attention for Deep Convolutional Neural Networks",2019,,
+56,MixNet-L,0.789,0.9420000000000001,7.3M,,"MixConv: Mixed Depthwise Convolutional Kernels",2019,,
+57,"Inception V3",0.7879999999999999,0.9440000000000001,23.8M,,"Rethinking the Inception Architecture for Computer Vision",2015,,
+58,EfficientNet-B1,0.7879999999999999,0.9440000000000001,7.8M,,"EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks",2019,,
+59,SGE-ResNet101,0.78798,0.94368,,,"Spatial Group-wise Enhance: Improving Semantic Feature Learning in Convolutional Networks",2019,,
+60,"ECA-Net (ResNet-101)",0.7865000000000001,0.9434,42.49M,,"ECA-Net: Efficient Channel Attention for Deep Convolutional Neural Networks",2019,,
+61,ResNet-152,0.7857,0.9429000000000001,,,"Deep Residual Learning for Image Recognition",2015,,
+62,DenseNet-201,0.7854000000000001,0.9445999999999999,20M,,"Densely Connected Convolutional Networks",2016,,
+63,"DPN-68 (320x320, Mean-Max Pooling)",0.7848999999999999,0.9448000000000001,,,"Dual Path Networks",2017,,
+64,SRM-ResNet-101,0.7847,,,,"SRM : A Style-based Recalibration Module for Convolutional Neural Networks",2019,,
+65,"DenseNet-161 + SWA",78.44,,,,"Averaging Weights Leads to Wider Optima and Better Generalization",2018,,
+66,"ResNet-50 (CutMix)",0.784,,,,"CutMix: Regularization Strategy to Train Strong Classifiers with Localizable Features",2019,,
+67,ResNet-101,0.7825,0.9395,40M,,"Deep Residual Learning for Image Recognition",2015,,
+68,"MultiGrain R50-AA-224",0.782,0.9390000000000001,,,"MultiGrain: a unified image embedding for classes and instances",2019,,
+69,WRN-50-2-bottleneck,0.7809999999999999,0.9397,68.9M,,"Wide Residual Networks",2016,,
+70,DenseNet-169,0.7792,0.9408,,,"Densely Connected Convolutional Networks",2016,,
+71,"DPN-68 (320x320)",0.7785,0.941,,,"Dual Path Networks",2017,,
+72,"ECA-Net (ResNet-50)",0.7748,0.9368000000000001,24.37M,,"ECA-Net: Efficient Channel Attention for Deep Convolutional Neural Networks",2019,,
+73,ResNet-50-D,0.7716,0.9351999999999999,25M,,"Bag of Tricks for Image Classification with Convolutional Neural Networks",2018,,
+74,ResNet-50,0.7715000000000001,0.9329000000000001,,,"Deep Residual Learning for Image Recognition",2015,,
+75,MixNet-M,0.77,0.9329999999999999,5.0M,,"MixConv: Mixed Depthwise Convolutional Kernels",2019,,
+76,SCARLET-A,0.769,0.934,6.7M,,"ScarletNAS: Bridging the Gap Between Scalability and Fairness in Neural Architecture Search",2019,,
+77,MnasNet-A3,0.767,0.9329999999999999,5.2M,,"MnasNet: Platform-Aware Neural Architecture Search for Mobile",2018,,
+78,"DPN-68 (224x224)",0.7643000000000001,0.9307,,,"Dual Path Networks",2017,,
+79,DenseNet-121,0.7639,0.9334,,,"Densely Connected Convolutional Networks",2016,,
+80,EfficientNet-B0,0.763,0.932,5.3M,,"EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks",2019,,
+81,SCARLET-B,0.763,0.93,6.5M,,"ScarletNAS: Bridging the Gap Between Scalability and Fairness in Neural Architecture Search",2019,,
+82,MoGA-A,0.759,0.9279999999999999,5.1M,,"MoGA: Searching Beyond MobileNetV3",2019,,
+83,DenseNAS-A,0.759,0.9259999999999999,,,"Densely Connected Search Space for More Flexible Neural Architecture Search",2019,,
+84,FractalNet-34,0.7587999999999999,0.9261,,,"FractalNet: Ultra-Deep Neural Networks without Residuals",2016,,
+85,MixNet-S,0.758,0.9279999999999999,4.1M,,"MixConv: Mixed Depthwise Convolutional Kernels",2019,,
+86,"CoordConv ResNet-50",0.7574,0.9275,,,"An Intriguing Failing of Convolutional Neural Networks and the CoordConv Solution",2018,,
+87,PReLU-Net,0.7573000000000001,0.9262,,,"Delving Deep into Rectifiers: Surpassing Human-Level Performance on ImageNet Classification",2015,,
+88,LR-Net-26,0.757,0.9259999999999999,,,"Local Relation Networks for Image Recognition",2019,,
+89,MnasNet-A2,0.7559999999999999,0.927,4.8M,,"MnasNet: Platform-Aware Neural Architecture Search for Mobile",2018,,
+90,SCARLET-C,0.7559999999999999,0.9259999999999999,6.0M,,"ScarletNAS: Bridging the Gap Between Scalability and Fairness in Neural Architecture Search",2019,,
+91,"ShuffleNet V2",0.754,,,,"ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design",2018,,
+92,MnasNet-A1,0.752,0.925,3.9M,,"MnasNet: Platform-Aware Neural Architecture Search for Mobile",2018,,
+93,"MobileNet V3-Large 1.0",0.752,,5.4M,,"Searching for MobileNetV3",2019,,
+94,"MultiGrain NASNet-A-Mobile (350px)",0.7509999999999999,0.925,,,"MultiGrain: a unified image embedding for classes and instances",2019,,
+95,DiCENet,0.7509999999999999,,,,"DiCENet: Dimension-wise Convolutions for Efficient Networks",2019,,
+96,"Single-Path NAS",0.7495999999999999,0.9220999999999999,,,"Single-Path NAS: Designing Hardware-Efficient ConvNets in less than 4 Hours",2019,,
+97,ESPNetv2,0.7490000000000001,,,,"ESPNetv2: A Light-weight, Power Efficient, and General Purpose Convolutional Neural Network",2018,,
+98,FBNet-C,0.7490000000000001,,5.5M,,"FBNet: Hardware-Aware Efficient ConvNet Design via Differentiable Neural Architecture Search",2018,,
+99,"Inception V2",0.748,0.922,11.2M,,"Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift",2015,,
+100,"MobileNetV2 (1.4)",0.747,,,,"MobileNetV2: Inverted Residuals and Linear Bottlenecks",2018,,
+101,VGG-19,0.745,0.92,144M,,"Very Deep Convolutional Networks for Large-Scale Image Recognition",2014,,
+102,VGG-16,0.7440000000000001,0.919,138M,,"Very Deep Convolutional Networks for Large-Scale Image Recognition",2014,,
+103,"MobileNet-224 (CGD)",0.7256,0.9092,,,"Compact Global Descriptor for Neural Networks",2019,,
+104,"ECA-Net (MobileNetV2)",0.7256,0.9081,3.34M,,"ECA-Net: Efficient Channel Attention for Deep Convolutional Neural Networks",2019,,
+105,SPPNet,0.7214,0.9186,,,"Spatial Pyramid Pooling in Deep Convolutional Networks for Visual Recognition",2014,,
+106,MSRA,0.7132,0.8905,,,"Spatial Pyramid Pooling in Deep Convolutional Networks for Visual Recognition",2014,,
+107,ShuffleNet,0.7090000000000001,0.898,,,"ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices",2017,,
+108,MobileNet-224,0.706,0.895,,,"MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications",2017,,
+109,"Inception V1",0.698,0.899,5M,,"Going Deeper with Convolutions",2014,,
+110,"Five Base + Five HiRes",0.6629999999999999,0.863,,,"Some Improvements on Deep Convolutional Neural Network Based Image Classification",2013,,
+111,"OverFeat - 7 accurate models",0.6604000000000001,0.8676,,,"OverFeat: Integrated Recognition, Localization and Detection using Convolutional Networks",2013,,
+112,ZFNet,0.64,0.853,,,"Visualizing and Understanding Convolutional Networks",2013,,
+113,"AlexNet - 7CNNs",0.633,0.846,60M,,"ImageNet Classification with Deep Convolutional Neural Networks",2012,,
