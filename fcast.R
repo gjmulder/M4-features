@@ -42,10 +42,10 @@ multi_fit_ts <- function(idx, data_x, data_x_deseason, m4_data_x_horiz) {
     })
   fcast_theta_classic <-
     theta_classic(input = data_x_deseason[[idx]]$output, fcast_horiz = m4_data_x_horiz[[idx]])$mean * data_x_deseason[[idx]]$si_out
-  fit_arima <-
-    auto.arima(data_x[[idx]], parallel = FALSE)
-  fcast_arima <-
-    forecast(fit_arima, h = m4_data_x_horiz[[idx]])
+  # fit_arima <-
+  #   auto.arima(data_x[[idx]], parallel = FALSE)
+  # fcast_arima <-
+  #   forecast(fit_arima, h = m4_data_x_horiz[[idx]])
   return(
     list(
       naive          = fcast_naive,
@@ -55,8 +55,8 @@ multi_fit_ts <- function(idx, data_x, data_x_deseason, m4_data_x_horiz) {
       holt           = fcast_holt,
       holt_damped    = fcast_holt_damped,
       theta_classic  = fcast_theta_classic,
-      combined       = (fcast_ses + fcast_holt + fcast_holt_damped) / 3,
-      arima          = fcast_arima
+      combined       = (fcast_ses + fcast_holt + fcast_holt_damped) / 3
+      # arima          = fcast_arima
     )
   )
 }
