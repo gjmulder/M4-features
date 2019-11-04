@@ -103,7 +103,7 @@ ts_to_json <- function(idx, ts_list, type_list, start_date_list) {
     list(
       start = fix_start(start_date_list[[idx]]),
       target = ts_list[[idx]],
-      feat_static_cat = c(as.numeric(type_list[[idx]]))
+      feat_static_cat = c(idx, as.numeric(type_list[[idx]]))
       # feat_dynamic_real = matrix(rexp(10 * length(ts_list[[idx]])), ncol =
       #                              10)
     ),
@@ -131,12 +131,12 @@ process_period <- function(period, m4_data, final_mode) {
   # }
 
   m4_st <-
-    unlist(lapply(m4_period_data, function(ts)
-      return(ts$st)))
+    lapply(m4_period_data, function(ts)
+      return(ts$st))
 
   m4_start_date <-
-    lapply(m4_st, function(st)
-      return(m4_info_df$StartingDate[m4_info_df$M4id == st]))
+    lapply(1:length(m4_st), function(idx)
+      return(m4_info_df$StartingDate[m4_info_df$M4id == m4_st[[idx]]]))
 
   m4_type <-
     lapply(m4_period_data, function(ts)
@@ -151,7 +151,7 @@ process_period <- function(period, m4_data, final_mode) {
 
   if (final_mode) {
     dirname <-
-      paste0("~/.mxnet_final/gluon-ts/datasets/m4_",
+      paste0("~/.mxnet_dual_cat_final/gluon-ts/datasets/m4_",
              tolower(period),
              '/')
     m4_train <-
@@ -163,9 +163,10 @@ process_period <- function(period, m4_data, final_mode) {
       lapply(m4_period_data, function(ts)
         return(c(ts$x, ts$xx)))
   } else {
-    paste0("~/.mxnet_training/gluon-ts/datasets/m4_",
-           tolower(period),
-           '/')
+    dirname <-
+      paste0("~/.mxnet_dual_cat_training/gluon-ts/datasets/m4_",
+             tolower(period),
+             '/')
     m4_train <-
       lapply(m4_period_data, function(ts)
         return(subset(ts$x, end = (
@@ -206,7 +207,7 @@ process_period <- function(period, m4_data, final_mode) {
 
 final_mode <- TRUE
 periods <- as.vector(levels(m4_data[[1]]$period))
-# periods <- c("Hourly")
+# periods <- c("Yearly")
 res <- unlist(lapply(periods, process_period, m4_data, final_mode))
 names(res) <- periods
 print(res)
