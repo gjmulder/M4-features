@@ -4,7 +4,7 @@ library(parallel)
 library(tidyverse)
 
 set.seed(42)
-options(warn = 2, width = 1024)
+options(warn = 0, width = 1024)
 source("fcast.R")
 
 ###########################################################################
@@ -114,7 +114,7 @@ print(round(mean_errs_df, 3))
 # write_csv(as.data.frame(t(mean_errs_df)), path = paste0("benchmark_m4_", m4_season, ".csv"))
 
 algo_dates <-
-  c(NA, NA, NA, NA, 1957, 1985, 2000, 1989)
+  c(NA, NA, NA, 1957, 1960, 1985, 2000, 1993, 1962)
 m4_res <-
   tibble(YEAR = algo_dates, METHOD = names(mean_errs_df), sMAPE=as.vector(t(mean_errs_df[1,])))
 colnames(m4_res) <- c("YEAR", "METHOD", "sMAPE")
