@@ -38,6 +38,7 @@ imagenet_top_year %>%
 print(gg)
 
 ####################################################################
+
 wmt14 %>%
   filter(! is.na(`BLEU SCORE`)) %>%
   filter(! is.na(YEAR)) %>%
@@ -64,9 +65,11 @@ wmt14_top_year %>%
 print(gg)
 
 ####################################################################
+
 mnist %>%
-  mutate(year = as.integer(substr(Reference, nchar(year)-4, nchar(year)))) %>%
+  mutate(year = as.integer(substr(Reference, nchar(Reference)-4, nchar(Reference)))) %>%
   filter(! is.na(year)) %>%
+  filter(year < 2005 | year > 2009) %>%
   filter(! is.na(`TEST ERROR RATE`)) %>%
   group_by(year) %>%
   top_n(-1, `TEST ERROR RATE`) %>%
@@ -78,15 +81,15 @@ mnist %>%
 print(lm(formula = normalised_test_error_rate ~ year, data = mnist_top_year))
 
 mnist_top_year %>%
-  ggplot(aes(x = year, y = `TEST ERROR RATE`)) +
-  geom_col(width = 0.5, fill = "blue") +
+  ggplot(aes(x = year, y = normalised_test_error_rate)) +
+  geom_point(size = 0.5) +
   ggtitle("MNIST Digit Recognition") +
   ylab("Normalised test error percentage (1998 = 1.0)") +
   xlab("Year model was published") +
-  geom_text(
-    aes(y = 0.5, label = CLASSIFIER),
-    colour = "black", size = 5, angle = 90
-  ) +
+  # geom_text(
+  #   aes(y = 0.5, label = CLASSIFIER),
+  #   colour = "black", size = 5, angle = 90
+  # ) +
   geom_smooth(method = "lm", colour = "black", se = FALSE) ->
   gg
 print(gg)
