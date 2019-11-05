@@ -46,6 +46,7 @@ multi_fit_ts <- function(idx, data_x, data_x_deseason, m4_data_x_horiz) {
     auto.arima(data_x[[idx]], parallel = FALSE)
   fcast_arima <-
     forecast(fit_arima, h = m4_data_x_horiz[[idx]])
+
   return(
     list(
       naive          = fcast_naive,
@@ -53,10 +54,10 @@ multi_fit_ts <- function(idx, data_x, data_x_deseason, m4_data_x_horiz) {
       naive2         = fcast_naive2,
       ses            = fcast_ses,
       holt           = fcast_holt,
+      arima          = fcast_arima,
       holt_damped    = fcast_holt_damped,
       theta_classic  = fcast_theta_classic,
-      combined       = (fcast_ses + fcast_holt + fcast_holt_damped) / 3,
-      arima          = fcast_arima
+      combined       = (fcast_ses + fcast_holt + fcast_holt_damped) / 3
     )
   )
 }
