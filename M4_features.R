@@ -11,12 +11,12 @@ source("fcast.R")
 # Config ####
 
 if (interactive()) {
-  prop_ts <- 0.1
+  prop_ts <- 0.001
 } else
 {
   prop_ts <- NA
 }
-use_parallel <- TRUE #is.na(prop_ts)
+use_parallel <- FALSE #is.na(prop_ts)
 err_names <- c("sMAPE", "MASE", "OWA")
 
 ###########################################################################
