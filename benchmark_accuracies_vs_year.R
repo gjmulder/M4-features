@@ -22,7 +22,7 @@ print(lm(formula = normalised_accuracy ~ YEAR, data = imagenet_top_year))
 
 imagenet_top_year %>%
   ggplot(aes(x = YEAR, y = normalised_accuracy)) +
-  geom_point(size = 1) +
+  geom_point(size = 2) +
   ggtitle("ImageNet Top-5 Accuracies") +
   ylab("Normalised accuracy (2012 = 1.0)") +
   xlab("Year model was published") +
@@ -32,9 +32,9 @@ imagenet_top_year %>%
   # ) +
   # geom_hline(aes(yintercept = 95), colour = "red", linetype = "dashed") +
   # geom_text(aes(y = 97, x = 2012.5), label = "Human level performance") +
-  geom_smooth(method = "lm", colour = "black", se = FALSE) ->
+  geom_line() +
+  geom_smooth(method="lm", se=FALSE) ->
   gg
-  # ylim(0, 100) -> gg
 print(gg)
 
 ####################################################################
@@ -52,7 +52,7 @@ print(lm(formula = normalised_bleu_score ~ YEAR, data = wmt14_top_year))
 
 wmt14_top_year %>%
   ggplot(aes(x = YEAR, y = normalised_bleu_score)) +
-  geom_point(size = 1) +
+  geom_point(size = 2) +
   ggtitle("WMT English to French Machine Translation") +
   ylab("Normalised BLEU Score (2014 = 1.0)") +
   xlab("Year model was published") +
@@ -60,7 +60,8 @@ wmt14_top_year %>%
   #   aes(y = 1.1, label = METHOD),
   #   colour = "black", size = 5, angle = 90
   # ) +
-  geom_smooth(method = "lm", colour = "black", se = FALSE) ->
+  geom_line() +
+  geom_smooth(method="lm", se=FALSE) ->
   gg
 print(gg)
 
@@ -69,6 +70,7 @@ print(gg)
 mnist %>%
   mutate(year = as.integer(substr(Reference, nchar(Reference)-4, nchar(Reference)))) %>%
   filter(! is.na(year)) %>%
+  # filter(year != 2005) %>%
   filter(year < 2005 | year > 2009) %>%
   filter(! is.na(`TEST ERROR RATE`)) %>%
   group_by(year) %>%
@@ -82,7 +84,7 @@ print(lm(formula = normalised_test_error_rate ~ year, data = mnist_top_year))
 
 mnist_top_year %>%
   ggplot(aes(x = year, y = normalised_test_error_rate)) +
-  geom_point(size = 0.5) +
+  geom_point(size = 2) +
   ggtitle("MNIST Digit Recognition") +
   ylab("Normalised test error percentage (1998 = 1.0)") +
   xlab("Year model was published") +
@@ -90,20 +92,21 @@ mnist_top_year %>%
   #   aes(y = 0.5, label = CLASSIFIER),
   #   colour = "black", size = 5, angle = 90
   # ) +
-  geom_smooth(method = "lm", colour = "black", se = FALSE) ->
+  geom_line() +
+  geom_smooth(method="lm", se=FALSE) ->
   gg
 print(gg)
 
 ####################################################################
 m4_top_year %>%
   filter(! is.na(YEAR)) %>%
-  mutate(normalised_smape = sMAPE / max(.$sMAPE)) ->
+  mutate(normalised_smape = max(.$sMAPE) / sMAPE) ->
   m4_top_year_norm
 print(lm(formula = normalised_smape ~ YEAR, data = m4_top_year_norm))
 
 m4_top_year_norm %>%
   ggplot(aes(x = YEAR, y = normalised_smape)) +
-  geom_point(size = 1, fill = "blue") +
+  geom_point(size = 2, fill = "blue") +
   ggtitle("M4 Competition sMAPE") +
   ylab("Normalised sMAPE (1957 = 1.0)") +
   xlab("Year model was published") +
@@ -111,5 +114,7 @@ m4_top_year_norm %>%
   #   aes(x = YEAR, y = normalised_smape, label = METHOD),
   #   colour = "black", nudge_x = -1, nudge_y = -0.01
   # ) +
-  geom_smooth(method = "lm", colour = "black", se = FALSE) -> gg
+  geom_line() +
+  geom_smooth(method="lm", se=FALSE) ->
+  gg
 print(gg)
