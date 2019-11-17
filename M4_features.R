@@ -11,12 +11,12 @@ source("fcast.R")
 # Config ####
 
 if (interactive()) {
-  prop_ts <- NA
+  prop_ts <- 0.001
 } else
 {
   prop_ts <- NA
 }
-use_parallel <- TRUE #is.na(prop_ts)
+use_parallel <- FALSE #is.na(prop_ts)
 err_names <- c("sMAPE", "MASE", "OWA")
 
 ###########################################################################
@@ -27,7 +27,7 @@ if (is.na(prop_ts)) {
 } else {
   m4_data <- Filter(function(ts)
     ts$period == "Monthly", M4)
-  # m4_data <- sample(M4, prop_ts * length(M4))
+  m4_data <- sample(m4_data, prop_ts * length(M4))
 }
 
 m4_data_x <-
@@ -50,7 +50,7 @@ m4_horiz <-
 
 if (use_parallel) {
   m4_data_x_deseason <- mclapply(1:length(m4_data_x), function(idx)
-    return(deseasonalise(m4_data_x[[idx]], m4_horiz[[idx]])), mc.cores = 2)
+    return(deseasonalise(m4_data_x[[idx]], m4_horiz[[idx]])), mc.cores = 3)
 } else {
   m4_data_x_deseason <- lapply(1:length(m4_data_x), function(idx)
     return(deseasonalise(m4_data_x[[idx]], m4_horiz[[idx]])))
@@ -71,7 +71,7 @@ if (use_parallel) {
     m4_data_x,
     m4_data_x_deseason,
     m4_horiz,
-    mc.cores = 2
+    mc.cores = 3
   )
 } else {
   fcasts <- lapply(1:length(m4_data_x),
@@ -91,7 +91,7 @@ if (use_parallel) {
                          fcasts,
                          m4_data_x,
                          m4_data_xx,
-                         mc.cores = 2)
+                         mc.cores = 3)
 } else {
   fcast_errs <- lapply(1:length(fcasts),
                        compute_fcast_errs,
@@ -114,7 +114,7 @@ print(round(mean_errs_df, 3))
 # write_csv(as.data.frame(t(mean_errs_df)), path = paste0("benchmark_m4_", m4_season, ".csv"))
 
 algo_dates <-
-  c(NA, NA, NA, 1957, 1960, 1985, 2000, 1993, 1962)
+  c(NA, NA, NA, 1957, 1960, 1962, 1985, 2000, 1993)
 m4_res <-
   tibble(YEAR = algo_dates, METHOD = names(mean_errs_df), sMAPE=as.vector(t(mean_errs_df[1,])))
 colnames(m4_res) <- c("YEAR", "METHOD", "sMAPE")
